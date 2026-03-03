@@ -16,12 +16,39 @@ load_lang() {
     fi
     [ -f "$lang_dir/${lang}.sh" ] || lang="en"
     source "$lang_dir/${lang}.sh" 2>/dev/null || {
-        # Inline English fallback for critical strings
+        # ── Complete English fallback (works without lang files) ──
         MSG_MAIN_MENU="MAIN MENU"
+        MSG_MENU_WEBSITE="Website Management"
+        MSG_MENU_DATABASE="Database Management"
+        MSG_MENU_SSL="SSL Certificate"
+        MSG_MENU_BACKUP="Backup & Restore"
+        MSG_MENU_SECURITY="Security & WAF"
+        MSG_MENU_PERFORMANCE="Performance & Speed"
+        MSG_MENU_CLUSTER="VPS Cluster Sync"
+        MSG_MENU_MONITORING="Monitoring & Logs"
+        MSG_MENU_SYSTEM="System Settings"
+        MSG_MENU_QUICK="Quick Tools"
+        MSG_MENU_MULTIIP="Multi-IP Management"
+        MSG_MENU_UPDATE="VPS Update & Tools"
         MSG_MENU_EXIT="Exit"
         MSG_SELECT="Select"
+        MSG_BACK="Back"
         MSG_PRESS_ENTER="Press Enter to continue..."
         MSG_INVALID="Invalid choice"
+        MSG_SYS_TITLE="SYSTEM SETTINGS"
+        MSG_SYS_INFO="System info"
+        MSG_SYS_UPDATE="Update system packages"
+        MSG_SYS_RESTART="Restart all services"
+        MSG_SYS_TG_CONFIG="Edit Telegram config"
+        MSG_SYS_CRON_VIEW="View crontab"
+        MSG_SYS_CRON_EDIT="Edit crontab"
+        MSG_SYS_CONFIG="Show VPS config"
+        MSG_SYS_LANG="Change Language"
+        MSG_SYS_LANG_CHANGED="Language changed to"
+        MSG_SYS_RESTARTED="All services restarted"
+        MSG_SYS_TG_TOKEN="Telegram Bot Token"
+        MSG_SYS_TG_CHAT="Chat ID"
+        MSG_SYS_TG_UPDATED="Telegram config updated"
     }
 }
 
@@ -258,9 +285,10 @@ show_main_menu() {
     echo -e "  ${MAGENTA}10.${NC} $MSG_MENU_QUICK"
     echo -e "  ${MAGENTA}11.${NC} $MSG_MENU_MULTIIP"
     echo -e "  ${YELLOW}12.${NC} $MSG_MENU_UPDATE"
+    echo -e "  ${YELLOW}13.${NC} 🌍 Change Language"
     echo -e "  ${RED}0.${NC} $MSG_MENU_EXIT"
     echo ""
-    read -p "  $MSG_SELECT [0-12]: " CHOICE
+    read -p "  $MSG_SELECT [0-13]: " CHOICE
 }
 
 # ---- 1. WEBSITE MANAGEMENT ----
@@ -1567,7 +1595,8 @@ while true; do
         10) menu_quick_tools ;;
         11) if type menu_multi_ip &>/dev/null; then menu_multi_ip; else echo -e "${RED}  Module not installed. Run: vps-update update${NC}"; sleep 2; fi ;;
         12) menu_vps_update ;;
+        13) change_language ;;
         0) echo -e "${GREEN}  Bye!${NC}"; exit 0 ;;
-        *) echo -e "${RED}  Invalid choice${NC}"; sleep 1 ;;
+        *) echo -e "${RED}  $MSG_INVALID${NC}"; sleep 1 ;;
     esac
 done
