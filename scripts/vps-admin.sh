@@ -8,7 +8,9 @@ readonly VER="2.5.1"
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 export LC_ALL=C
 
-source /root/.vps-config/setup.conf 2>/dev/null
+# Initialize config vars with defaults before sourcing (prevents set -u crash)
+SERVER_IP="" DB_ROOT_PASS="" VPS_NAME="" DOMAINS="" VPS_LANG=""
+source /root/.vps-config/setup.conf 2>/dev/null || true
 
 # ── Language Loader (i18n) ──
 load_lang() {
@@ -119,7 +121,7 @@ _sanitize() {
 # ── MySQL Auth Helper ──
 # Uses DB_ROOT_PASS from config; falls back to unix socket auth (no password)
 _mysql_auth=""
-if [ -n "$DB_ROOT_PASS" ]; then
+if [ -n "${DB_ROOT_PASS:-}" ]; then
     # Use defaults-extra-file to avoid password in ps output
     _my_cnf=$(mktemp /tmp/.my.cnf.XXXXXX)
     chmod 600 "$_my_cnf"
