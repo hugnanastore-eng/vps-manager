@@ -1194,6 +1194,21 @@ do_update() {
     done
     [ $_mod_updated -gt 0 ] && log "✓ ${_mod_updated} modules updated"
 
+    # Download and install language files
+    log "Updating language files..."
+    mkdir -p /usr/local/bin/vps-modules/lang
+    local _langs=("en" "vi" "zh" "ja" "fr" "es" "pt")
+    local _lang_updated=0
+    for _lang in "${_langs[@]}"; do
+        curl -fsSL --retry 3 "$SCRIPT_URL/lang/${_lang}.sh" -o "/tmp/lang-${_lang}-new.sh" 2>/dev/null
+        if [ -f "/tmp/lang-${_lang}-new.sh" ] && [ -s "/tmp/lang-${_lang}-new.sh" ]; then
+            mv "/tmp/lang-${_lang}-new.sh" "/usr/local/bin/vps-modules/lang/${_lang}.sh"
+            chmod +x "/usr/local/bin/vps-modules/lang/${_lang}.sh"
+            ((_lang_updated++))
+        fi
+    done
+    [ $_lang_updated -gt 0 ] && log "✓ ${_lang_updated} language files updated"
+
     # Write REMOTE version (not stale local $VERSION)
     echo "$remote_ver" > "$VERSION_FILE"
     # Also update local variable so subsequent calls show correct version

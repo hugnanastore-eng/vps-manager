@@ -53,7 +53,7 @@ load_lang() {
 }
 
 change_language() {
-    echo -e "\n${WHITE}${BOLD}  ${MSG_SYS_LANG:-Change Language}${NC}"
+    echo -e "\n${WHITE}${BOLD}  🌍 Change Language${NC}"
     echo -e "${GREEN}  ─────────────────────────────────${NC}"
     echo -e "  ${CYAN}1.${NC} 🇬🇧 English"
     echo -e "  ${CYAN}2.${NC} 🇻🇳 Tiếng Việt"
@@ -63,19 +63,31 @@ change_language() {
     echo -e "  ${CYAN}6.${NC} 🇪🇸 Español"
     echo -e "  ${CYAN}7.${NC} 🇧🇷 Português"
     echo ""
-    read -p "  ${MSG_SELECT:-Select} [1-7]: " _lang_pick
+    read -p "  Select [1-7]: " _lang_pick
     case "$_lang_pick" in
         1) VPS_LANG="en" ;; 2) VPS_LANG="vi" ;; 3) VPS_LANG="zh" ;;
         4) VPS_LANG="ja" ;; 5) VPS_LANG="fr" ;; 6) VPS_LANG="es" ;;
         7) VPS_LANG="pt" ;; *) return ;;
     esac
+
+    # Download lang file if missing
+    local lang_dir="/usr/local/bin/vps-modules/lang"
+    mkdir -p "$lang_dir" 2>/dev/null
+    if [ ! -f "$lang_dir/${VPS_LANG}.sh" ]; then
+        echo -e "  ${YELLOW}Downloading language file...${NC}"
+        curl -fsSL --retry 3 "https://raw.githubusercontent.com/hugnanastore-eng/vps-manager/main/scripts/lang/${VPS_LANG}.sh" \
+            -o "$lang_dir/${VPS_LANG}.sh" 2>/dev/null
+        [ -f "$lang_dir/${VPS_LANG}.sh" ] && chmod +x "$lang_dir/${VPS_LANG}.sh"
+    fi
+
     # Save to config
     if [ -f /root/.vps-config/setup.conf ]; then
         sed -i '/^VPS_LANG=/d' /root/.vps-config/setup.conf
         echo "VPS_LANG=$VPS_LANG" >> /root/.vps-config/setup.conf
     fi
     load_lang
-    echo -e "  ${GREEN}✓ ${MSG_SYS_LANG_CHANGED:-Language changed to} ${VPS_LANG}${NC}"
+    echo -e "  ${GREEN}✓ Language changed to ${VPS_LANG}${NC}"
+    sleep 1
 }
 
 load_lang
