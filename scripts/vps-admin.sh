@@ -185,9 +185,10 @@ show_main_menu() {
     echo -e "  ${CYAN}9.${NC} System Settings"
     echo -e "  ${MAGENTA}10.${NC} Quick Tools"
     echo -e "  ${MAGENTA}11.${NC} Multi-IP Management"
+    echo -e "  ${YELLOW}12.${NC} VPS Update & Tools"
     echo -e "  ${RED}0.${NC} Exit"
     echo ""
-    read -p "  Select [0-11]: " CHOICE
+    read -p "  Select [0-12]: " CHOICE
 }
 
 # ---- 1. WEBSITE MANAGEMENT ----
@@ -888,6 +889,36 @@ menu_quick_tools() {
     esac
 }
 
+# ---- 12. VPS UPDATE & TOOLS ----
+menu_vps_update() {
+    header
+    echo -e "${WHITE}${BOLD}  🔧 VPS UPDATE & TOOLS${NC}"
+    echo -e "${GREEN}  ─────────────────────────────────${NC}"
+
+    # Show current version
+    local cur_ver="unknown"
+    [ -f /root/.vps-config/version ] && cur_ver=$(cat /root/.vps-config/version)
+    echo -e "  Current version: ${CYAN}v${cur_ver}${NC}"
+    echo ""
+
+    echo -e "  ${CYAN}1.${NC} 🚀 Smart Install (full setup)"
+    echo -e "  ${CYAN}2.${NC} 🔄 Update Scripts (pull latest)"
+    echo -e "  ${CYAN}3.${NC} 🔍 Security Audit"
+    echo -e "  ${CYAN}4.${NC} 🛡️  Malware Scanner"
+    echo -e "  ${CYAN}5.${NC} 🔥 Firewall Hardening"
+    echo -e "  ${RED}0.${NC} Back"
+    echo ""
+    read -p "  Select: " VU_CHOICE
+
+    case $VU_CHOICE in
+        1) vps-update smart; pause ;;
+        2) vps-update update; pause ;;
+        3) vps-update audit; pause ;;
+        4) vps-update malware-scan; pause ;;
+        5) vps-update firewall; pause ;;
+    esac
+}
+
 # ---- Interactive Backup Restore ----
 interactive_restore() {
     echo ""
@@ -1352,6 +1383,7 @@ while true; do
         9) menu_system ;;
         10) menu_quick_tools ;;
         11) if type menu_multi_ip &>/dev/null; then menu_multi_ip; else echo -e "${RED}  Module not installed. Run: vps-update update${NC}"; sleep 2; fi ;;
+        12) menu_vps_update ;;
         0) echo -e "${GREEN}  Bye!${NC}"; exit 0 ;;
         *) echo -e "${RED}  Invalid choice${NC}"; sleep 1 ;;
     esac
