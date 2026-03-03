@@ -92,11 +92,26 @@ change_language() {
 
 load_lang
 
+# ── Input Sanitizer (prevent command injection in sed/eval) ──
+_sanitize() {
+    # Strip characters that could break sed/shell: | ; & ` $ \ " ' newline
+    echo "$1" | tr -d '|;&`$\\"\x27\n\r'
+}
+
 # ── MySQL Auth Helper ──
 # Uses DB_ROOT_PASS from config; falls back to unix socket auth (no password)
 _mysql_auth=""
 if [ -n "$DB_ROOT_PASS" ]; then
-    _mysql_auth="-uroot -p${DB_ROOT_PASS}"
+    # Use defaults-extra-file to avoid password in ps output
+    _my_cnf=$(mktemp /tmp/.my.cnf.XXXXXX)
+    chmod 600 "$_my_cnf"
+    cat > "$_my_cnf" <<MYCNF
+[client]
+user=root
+password=${DB_ROOT_PASS}
+MYCNF
+    _mysql_auth="--defaults-extra-file=$_my_cnf"
+    trap 'rm -f "$_my_cnf"' EXIT
 else
     # Try unix socket auth (default on Ubuntu/Debian for root)
     _mysql_auth="-uroot"
@@ -839,24 +854,26 @@ cluster_migrate() {
     DB=$(grep "^$MIG_DOMAIN:" /root/.vps-config/db-credentials.txt 2>/dev/null | grep -oP 'DB=\K\S+')
     DB_USER_MIG=$(grep "^$MIG_DOMAIN:" /root/.vps-config/db-credentials.txt 2>/dev/null | grep -oP 'USER=\K\S+')
     DB_PASS_MIG=$(grep "^$MIG_DOMAIN:" /root/.vps-config/db-credentials.txt 2>/dev/null | grep -oP 'PASS=\K\S+')
-    _mysqldump "$DB" 2>/dev/null | gzip > /tmp/migrate_${MIG_DOMAIN}.sql.gz
+    local _mig_tmp=$(mktemp /tmp/migrate_XXXXXX.sql.gz)
+    _mysqldump "$DB" 2>/dev/null | gzip > "$_mig_tmp"
 
     # 2. Sync files
     rsync -azP /home/$MIG_DOMAIN/ root@$TGT_IP:/home/$MIG_DOMAIN/
-    scp /tmp/migrate_${MIG_DOMAIN}.sql.gz root@$TGT_IP:/tmp/
+    local _remote_tmp="/tmp/migrate_${MIG_DOMAIN}_$$.sql.gz"
+    scp "$_mig_tmp" root@$TGT_IP:"$_remote_tmp"
     scp /etc/nginx/conf.d/${MIG_DOMAIN}.conf root@$TGT_IP:/etc/nginx/conf.d/
 
     # 3. Import DB on target
     ssh root@$TGT_IP "
     source /root/.vps-config/setup.conf 2>/dev/null
     mysql -uroot -p\"\$DB_ROOT_PASS\" -e \"CREATE DATABASE IF NOT EXISTS \\\`$DB\\\`; CREATE USER IF NOT EXISTS '$DB_USER_MIG'@'localhost' IDENTIFIED BY '$DB_PASS_MIG'; GRANT ALL ON \\\`$DB\\\`.* TO '$DB_USER_MIG'@'localhost'; FLUSH PRIVILEGES;\" 2>/dev/null
-    gunzip -c /tmp/migrate_${MIG_DOMAIN}.sql.gz | mysql -uroot -p\"\$DB_ROOT_PASS\" '$DB' 2>/dev/null
+    gunzip -c '$_remote_tmp' | mysql -uroot -p\"\$DB_ROOT_PASS\" '$DB' 2>/dev/null
     chown -R nginx:nginx /home/$MIG_DOMAIN/ 2>/dev/null || chown -R www-data:www-data /home/$MIG_DOMAIN/
     nginx -t && nginx -s reload
-    rm /tmp/migrate_${MIG_DOMAIN}.sql.gz
+    rm -f '$_remote_tmp'
     " 2>/dev/null
 
-    rm /tmp/migrate_${MIG_DOMAIN}.sql.gz
+    rm -f "$_mig_tmp"
 
     echo -e "${GREEN}  ✓ $MIG_DOMAIN migrated to $MIG_TARGET${NC}"
     echo -e "  ${YELLOW}Don't forget to update DNS to point to $TGT_IP${NC}"
@@ -962,11 +979,14 @@ menu_system() {
         3) systemctl restart nginx; systemctl restart php-fpm 2>/dev/null || systemctl restart php8.1-fpm; systemctl restart mariadb
            echo -e "${GREEN}  ✓ $MSG_SYS_RESTARTED${NC}"; pause ;;
         4) read -p "  $MSG_SYS_TG_TOKEN: " NT; read -p "  $MSG_SYS_TG_CHAT: " NCHAT
-           sed -i "s|TG_TOKEN=.*|TG_TOKEN=\"$NT\"|" /root/.vps-config/setup.conf
-           sed -i "s|TG_CHAT=.*|TG_CHAT=\"$NCHAT\"|" /root/.vps-config/setup.conf
-           # Update tg_alert.sh
-           sed -i "s|TOKEN=.*|TOKEN=\"$NT\"|" /usr/local/bin/tg_alert.sh
-           sed -i "s|CHAT=.*|CHAT=\"$NCHAT\"|" /usr/local/bin/tg_alert.sh
+           NT=$(_sanitize "$NT"); NCHAT=$(_sanitize "$NCHAT")
+           sed -i '/^TG_TOKEN=/d;/^TG_CHAT=/d' /root/.vps-config/setup.conf
+           echo "TG_TOKEN=\"$NT\"" >> /root/.vps-config/setup.conf
+           echo "TG_CHAT=\"$NCHAT\"" >> /root/.vps-config/setup.conf
+           if [ -f /usr/local/bin/tg_alert.sh ]; then
+               sed -i '/^TOKEN=/d;/^CHAT=/d' /usr/local/bin/tg_alert.sh
+               sed -i "2i TOKEN=\"$NT\"\nCHAT=\"$NCHAT\"" /usr/local/bin/tg_alert.sh
+           fi
            echo -e "${GREEN}  ✓ $MSG_SYS_TG_UPDATED${NC}"; pause ;;
         5) crontab -l; pause ;;
         6) crontab -e ;;
@@ -1068,17 +1088,21 @@ _tg_setup() {
     read -p "  Chat ID: " _new_chat
     [ -z "$_new_token" ] || [ -z "$_new_chat" ] && { echo -e "  ${RED}Both fields required${NC}"; pause; return; }
 
-    # Save to config
+    # Sanitize input to prevent injection
+    _new_token=$(_sanitize "$_new_token")
+    _new_chat=$(_sanitize "$_new_chat")
+
+    # Save to config (delete+append, not sed substitution)
     sed -i '/^TG_TOKEN=/d;/^TG_CHAT=/d' /root/.vps-config/setup.conf 2>/dev/null
     echo "TG_TOKEN=\"$_new_token\"" >> /root/.vps-config/setup.conf
     echo "TG_CHAT=\"$_new_chat\"" >> /root/.vps-config/setup.conf
     export TG_TOKEN="$_new_token"
     export TG_CHAT="$_new_chat"
 
-    # Update tg_alert.sh if exists
+    # Update tg_alert.sh if exists (safe: delete+insert, no sed substitution)
     if [ -f /usr/local/bin/tg_alert.sh ]; then
-        sed -i "s|TOKEN=.*|TOKEN=\"$_new_token\"|" /usr/local/bin/tg_alert.sh
-        sed -i "s|CHAT=.*|CHAT=\"$_new_chat\"|" /usr/local/bin/tg_alert.sh
+        sed -i '/^TOKEN=/d;/^CHAT=/d' /usr/local/bin/tg_alert.sh
+        sed -i "2i TOKEN=\"$_new_token\"\nCHAT=\"$_new_chat\"" /usr/local/bin/tg_alert.sh
     fi
 
     echo -e "  ${GREEN}✓ Telegram configured!${NC}"
