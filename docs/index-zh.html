@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPS Manager v2.0 | 一键VPS管理工具 WordPress & LEMP</title>
+    <meta name="description"
+        content="一站式VPS管理工具包。自动安装 Nginx、PHP 8、MariaDB、WordPress、SSL、WAF、备份、监控。11个管理菜单，39项安全验证。免费开源。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0e17;
+            --surface: #111827;
+            --surface2: #1e293b;
+            --primary: #06b6d4;
+            --primary-glow: #22d3ee;
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --red: #ef4444;
+            --purple: #8b5cf6;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #1e293b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .lang-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .lang-bar a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 4px 12px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .lang-bar a.active {
+            color: var(--primary);
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        .lang-bar a:hover {
+            color: var(--primary);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 100px 0 60px;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--primary);
+            margin-bottom: 24px;
+        }
+
+        .badge .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        h1 {
+            font-size: clamp(36px, 5vw, 64px);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        h1 span {
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 640px;
+            margin: 0 auto 32px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .install-block {
+            max-width: 700px;
+            margin: 0 auto 40px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .install-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--surface2);
+        }
+
+        .install-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .install-code {
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: var(--green);
+            white-space: nowrap;
+            overflow-x: auto;
+        }
+
+        .install-code .comment {
+            color: var(--text-muted);
+        }
+
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .section-sub {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 16px;
+            margin-bottom: 48px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .feature-tag {
+            display: inline-block;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--primary);
+            margin-top: 12px;
+            font-weight: 500;
+        }
+
+        .menu-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+        }
+
+        .menu-table th,
+        .menu-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .menu-table th {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-table td:first-child {
+            color: var(--primary);
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .compare-table th,
+        .compare-table td {
+            padding: 12px 16px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .compare-table th {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .compare-table th:last-child {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .compare-table td:first-child {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .check {
+            color: var(--green);
+            font-size: 18px;
+        }
+
+        .cross {
+            color: var(--red);
+            font-size: 18px;
+        }
+
+        .cta {
+            text-align: center;
+            padding: 80px 0;
+        }
+
+        .cta h2 {
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+
+        .cta p {
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            font-size: 16px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--bg);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-glow);
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+            margin-left: 12px;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .donate-btn {
+            background: #0070ba;
+            color: white;
+        }
+
+        .donate-btn:hover {
+            background: #005ea6;
+            box-shadow: 0 0 30px rgba(0, 112, 186, 0.3);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .screenshot {
+            max-width: 700px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .screenshot img {
+            width: 100%;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .stats {
+                gap: 24px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="lang-bar">
+        <a href="index-vi.html">🇻🇳 Tiếng Việt</a>
+        <a href="index-en.html">🇬🇧 English</a>
+        <a href="index-zh.html" class="active">🇨🇳 中文</a>
+    </div>
+
+    <section class="hero">
+        <div class="container">
+            <div class="badge"><span class="dot"></span> 开源 · v2.0.0</div>
+            <h1>您的VPS，<br><span>全面管理</span></h1>
+            <p>一站式工具包，用于安装、保护和管理 WordPress VPS 服务器。一条命令完成安装，11个菜单管理一切。</p>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-num">11</div>
+                    <div class="stat-label">管理菜单</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">39</div>
+                    <div class="stat-label">安全检查</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">5 分钟</div>
+                    <div class="stat-label">完成安装</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">100%</div>
+                    <div class="stat-label">免费</div>
+                </div>
+            </div>
+            <div class="install-block">
+                <div class="install-header">
+                    <div class="install-dot" style="background:#ef4444"></div>
+                    <div class="install-dot" style="background:#f59e0b"></div>
+                    <div class="install-dot" style="background:#10b981"></div>
+                </div>
+                <div class="install-code">
+                    <span class="comment"># 在新VPS上安装</span><br>
+                    curl -sO https://raw.githubusercontent.com/hugnanastore-eng/vps-manager/main/scripts/install.sh &&
+                    bash install.sh
+                </div>
+            </div>
+            <a href="https://github.com/hugnanastore-eng/vps-manager" class="btn btn-primary">⭐ 在 GitHub 上查看</a>
+            <a href="#features" class="btn btn-secondary">了解更多 ↓</a>
+        </div>
+    </section>
+
+    <section class="section" id="features">
+        <div class="container">
+            <h2 class="section-title">您所需的一切</h2>
+            <p class="section-sub">从安装到日常管理 — 一个工具包搞定</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>网站管理</h3>
+                    <p>添加/删除 WordPress 站点，管理重定向，修复权限，切换维护模式，管理插件 — 全部在一个菜单中完成。</p>
+                    <span class="feature-tag">菜单 #1</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>安全 & WAF</h3>
+                    <p>12步恶意软件扫描器，7步防火墙加固，IP 封禁/解封，文件完整性检查，WordPress 批量安全审计。</p>
+                    <span class="feature-tag">菜单 #5</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>SSL 证书</h3>
+                    <p>自动签发 Let's Encrypt SSL，续签所有证书，检查到期日期。域名选择器使操作更便捷。</p>
+                    <span class="feature-tag">菜单 #3</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💾</div>
+                    <h3>备份与恢复</h3>
+                    <p>每日自动备份，Google Drive 同步，任意网站和数据库的时间点恢复。</p>
+                    <span class="feature-tag">菜单 #4</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>性能与速度</h3>
+                    <p>Redis/Memcached 切换，PHP OPcache，Nginx FastCGI 缓存，Gzip/Brotli 压缩 — 让您的站点飞速运行。</p>
+                    <span class="feature-tag">菜单 #6</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>多IP管理</h3>
+                    <p>将特定IP分配给特定网站。查看 IP→域名 绑定关系。非常适合多站点、多品牌托管。</p>
+                    <span class="feature-tag">菜单 #11 · 新功能</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔗</div>
+                    <h3>VPS 集群同步</h3>
+                    <p>多VPS备份同步，跨服务器迁移，集群节点管理，实现高可用部署。</p>
+                    <span class="feature-tag">菜单 #7</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>监控与日志</h3>
+                    <p>实时健康检查，TTFB 监控，调试日志，磁盘使用跟踪，Telegram 警报通知。</p>
+                    <span class="feature-tag">菜单 #8</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>39项输入验证</h3>
+                    <p>每个用户输入在使用前都经过验证。域名、IP、数据库和插件名称都经过清理，防止注入攻击。</p>
+                    <span class="feature-tag">安全</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" style="background: var(--surface)">
+        <div class="container">
+            <h2 class="section-title">11个管理菜单</h2>
+            <p class="section-sub">全面的服务器管理，触手可及</p>
+            <div class="screenshot">
+                <img src="screenshots/main-menu.png" alt="VPS Manager 主菜单">
+            </div>
+            <table class="menu-table" style="margin-top: 40px;">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>菜单</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>网站管理</td>
+                        <td>添加/删除站点、重定向、权限、插件</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>数据库管理</td>
+                        <td>创建、删除、导入、导出 MySQL 数据库</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>SSL 证书</td>
+                        <td>Let's Encrypt 自动签发、续签、到期检查</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>备份与恢复</td>
+                        <td>每日备份、Google Drive、时间点恢复</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>安全 & WAF</td>
+                        <td>恶意软件扫描、防火墙、IP封禁、完整性检查</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>性能与速度</td>
+                        <td>Redis、OPcache、FastCGI、Gzip/Brotli</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>VPS 集群同步</td>
+                        <td>多VPS同步、迁移、集群管理</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>监控与日志</td>
+                        <td>健康检查、TTFB、调试日志、Telegram 警报</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>系统设置</td>
+                        <td>PHP 版本、Nginx 配置、SSH、Swap</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>快捷工具</td>
+                        <td>常用管理快捷方式和实用工具</td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td>多IP管理</td>
+                        <td>IP→域名绑定、多IP网站</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">为什么选择 VPS Manager？</h2>
+            <p class="section-sub">与手动配置和其他脚本的对比</p>
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>功能</th>
+                        <th>手动</th>
+                        <th>其他工具</th>
+                        <th>VPS Manager</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>一键安装</td>
+                        <td class="cross">✕</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>智能检测（已有环境）</td>
+                        <td class="cross">✕</td>
+                        <td class="cross">✕</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>管理菜单</td>
+                        <td class="cross">0</td>
+                        <td>3-5</td>
+                        <td><strong style="color:var(--primary)">11</strong></td>
+                    </tr>
+                    <tr>
+                        <td>输入验证</td>
+                        <td class="cross">✕</td>
+                        <td class="cross">✕</td>
+                        <td><strong style="color:var(--green)">39项检查</strong></td>
+                    </tr>
+                    <tr>
+                        <td>多IP绑定</td>
+                        <td class="cross">✕</td>
+                        <td class="cross">✕</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>域名选择器</td>
+                        <td class="cross">✕</td>
+                        <td class="cross">✕</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>模块化架构</td>
+                        <td class="cross">✕</td>
+                        <td class="cross">✕</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>恶意软件扫描</td>
+                        <td class="cross">✕</td>
+                        <td>基础</td>
+                        <td><strong style="color:var(--green)">12步</strong></td>
+                    </tr>
+                    <tr>
+                        <td>集群同步</td>
+                        <td class="cross">✕</td>
+                        <td class="cross">✕</td>
+                        <td class="check">✓</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="container">
+            <h2>☕ 支持这个项目</h2>
+            <p>如果这个工具帮您节省了时间，请考虑请我喝杯咖啡！</p>
+            <a href="https://paypal.me/HoangDuong" class="btn donate-btn" target="_blank">☕ 通过 PayPal 请我喝咖啡</a>
+            <br><br>
+            <a href="https://github.com/hugnanastore-eng/vps-manager" class="btn btn-primary" target="_blank">⭐ 在 GitHub
+                上给个 Star</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>VPS Manager v2.0.0 · MIT 许可证 · 为VPS社区用 ❤️ 制作</p>
+        </div>
+    </footer>
+
+</body>
+
+</html>

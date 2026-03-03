@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Quản Trị VPS 1 Chạm | Cài Đặt Nginx, WordPress, SSL Tự Động</title>
+    <meta name="description"
+        content="Script quản trị VPS 1 chạm - tự động cài đặt Nginx, PHP 8, MariaDB, WordPress, SSL, WAF, backup, monitoring. Thay thế HocVPS Script với tính năng mạnh mẽ hơn. Miễn phí 100%.">
+    <meta name="keywords"
+        content="script quản trị vps 1 chạm, cài đặt vps, quản lý vps, nginx wordpress, hocvps script, auto install vps, vps admin panel, bảo mật vps">
+    <meta name="author" content="QLTro.com">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Script Quản Trị VPS 1 Chạm | Cài Đặt Tự Động">
+    <meta property="og:description"
+        content="Tự động cài Nginx, PHP 8, WordPress, SSL, WAF, backup, monitoring trên VPS trắng. Chỉ cần nhập domain, 5 phút xong.">
+    <meta property="og:url" content="https://qltro.com/vps">
+    <meta property="og:site_name" content="QLTro.com">
+    <meta property="og:image" content="https://qltro.com/vps/og-image.png">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Script Quản Trị VPS 1 Chạm">
+    <meta name="twitter:description"
+        content="Cài đặt VPS trắng chỉ trong 5 phút. Nginx, PHP 8, WordPress, SSL, WAF, backup tự động.">
+
+    <link rel="canonical" href="https://qltro.com/vps">
+
+    <!-- Schema JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "VPS Admin Script 1 Chạm",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Linux",
+        "description": "Script tự động cài đặt và quản trị VPS cho WordPress/WooCommerce. Bao gồm Nginx, PHP 8, MariaDB, SSL, WAF, backup, monitoring.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "VND"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "QLTro.com"
+        }
+    }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0a0e1a;
+            --bg-card: #111827;
+            --bg-card-hover: #1a2332;
+            --border: #1e293b;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.3);
+            --green: #10b981;
+            --green-glow: rgba(16, 185, 129, 0.2);
+            --purple: #8b5cf6;
+            --orange: #f59e0b;
+            --red: #ef4444;
+            --cyan: #06b6d4;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+            animation: heroFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes heroFloat {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(30px, -30px) rotate(1deg);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) rotate(-1deg);
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 100px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--accent);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            animation: fadeUp 0.8s ease-out;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #3b82f6 50%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeUp 0.8s ease-out 0.1s both;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 2.5rem;
+            animation: fadeUp 0.8s ease-out 0.2s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp 0.8s ease-out 0.3s both;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-card);
+            border-color: var(--accent);
+        }
+
+        /* Terminal Preview */
+        .terminal-preview {
+            max-width: 700px;
+            margin: 3rem auto 0;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            animation: fadeUp 0.8s ease-out 0.4s both;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-header {
+            background: #1e293b;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red {
+            background: #ef4444;
+        }
+
+        .terminal-dot.yellow {
+            background: #f59e0b;
+        }
+
+        .terminal-dot.green {
+            background: #10b981;
+        }
+
+        .terminal-body {
+            background: #0d1117;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .terminal-body .comment {
+            color: #6b7280;
+        }
+
+        .terminal-body .cmd {
+            color: #10b981;
+        }
+
+        .terminal-body .prompt {
+            color: #3b82f6;
+        }
+
+        .terminal-body .output {
+            color: #94a3b8;
+        }
+
+        /* Sections */
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .section h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-desc {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            max-width: 600px;
+            margin-bottom: 3rem;
+        }
+
+        /* Feature Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-4px);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-icon.blue {
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .feature-icon.green {
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        .feature-icon.purple {
+            background: rgba(139, 92, 246, 0.15);
+        }
+
+        .feature-icon.orange {
+            background: rgba(245, 158, 11, 0.15);
+        }
+
+        .feature-icon.cyan {
+            background: rgba(6, 182, 212, 0.15);
+        }
+
+        .feature-icon.red {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .feature-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Comparison Table */
+        .comparison-section {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 14px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .comparison-table th:nth-child(2) {
+            color: var(--text-muted);
+        }
+
+        .comparison-table th:nth-child(3) {
+            color: var(--accent);
+        }
+
+        .comparison-table td {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .comparison-table td:first-child {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .check {
+            color: var(--green);
+            font-weight: bold;
+        }
+
+        .cross {
+            color: var(--red);
+            opacity: 0.5;
+        }
+
+        .new-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+
+        /* Steps */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .step {
+            position: relative;
+            padding: 2rem;
+            padding-top: 3rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -16px;
+            left: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #fff;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .step h3 {
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .step p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .step code {
+            display: block;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--green);
+            overflow-x: auto;
+        }
+
+        /* Menu Section */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: var(--bg-card-hover);
+        }
+
+        .menu-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .menu-item h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .menu-item p {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        /* CTA */
+        .cta {
+            text-align: center;
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .cta p {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            margin-bottom: 2rem;
+        }
+
+        .copy-box {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .copy-box span {
+            color: var(--green);
+        }
+
+        .copy-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #2563eb;
+        }
+
+        .copy-btn.copied {
+            background: var(--green);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .section h2 {
+                font-size: 1.8rem;
+            }
+
+            .section {
+                padding: 4rem 1.5rem;
+            }
+
+            .comparison-section {
+                padding: 1.5rem;
+                overflow-x: auto;
+            }
+
+            .comparison-table {
+                min-width: 500px;
+            }
+
+            .copy-box {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                🚀 Miễn phí & Mã nguồn mở
+            </div>
+            <h1>Script Quản Trị VPS 1 Chạm</h1>
+            <p>Tự động cài đặt Nginx, PHP 8, MariaDB, WordPress, SSL, WAF, backup, monitoring — từ VPS trắng đến
+                production chỉ trong <strong>5 phút</strong>. Bảo mật <strong>39 input validations</strong>, chống
+                injection toàn diện.</p>
+
+            <div class="hero-buttons">
+                <a href="#install" class="btn btn-primary">
+                    ⬇️ Tải & Cài Đặt
+                </a>
+                <a href="#features" class="btn btn-outline">
+                    📋 Xem Tính Năng
+                </a>
+            </div>
+
+            <div class="terminal-preview">
+                <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span style="color:#94a3b8;font-size:0.8rem;margin-left:8px;">root@vps ~</span>
+                </div>
+                <div class="terminal-body">
+                    <span class="prompt">$</span> <span class="cmd">curl -sL https://qltro.com/vps/scripts/install.sh |
+                        bash</span><br>
+                    <span class="output">Enter domains: </span><span class="cmd">shop1.com,shop2.com</span><br>
+                    <span class="output">[SETUP] Detected: Rocky Linux 9</span><br>
+                    <span class="output">[SETUP] Installing Nginx + PHP 8.1 + MariaDB...</span><br>
+                    <span class="output">[SETUP] Creating shop1.com (DB: shop1_a3f2b1)</span><br>
+                    <span class="output">[SETUP] Creating shop2.com (DB: shop2_c8e4d7)</span><br>
+                    <span class="output">[SETUP] SSL installed for shop1.com ✓</span><br>
+                    <span class="output">[SETUP] WAF + Security headers configured ✓</span><br>
+                    <span class="output">[SETUP] Backup + Monitoring + Admin panel ✓</span><br><br>
+                    <span class="cmd">✅ SETUP COMPLETE!</span><br>
+                    <span class="output">Admin panel: </span><span class="cmd">vps-admin</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section scroll-reveal" id="features">
+        <span class="section-label">Tính năng</span>
+        <h2>Tất Cả Trong 1 Script</h2>
+        <p class="section-desc">Không cần cài từng phần, không cần config thủ công. Script xử lý mọi thứ.</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon blue">🌐</div>
+                <h3>Multi-site WordPress</h3>
+                <p>Tạo không giới hạn website trên 1 VPS. Tự động cài WordPress, tạo database, cấu hình Nginx, SSL — chỉ
+                    cần nhập tên domain.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon green">🛡️</div>
+                <h3>WAF & Bảo Mật</h3>
+                <p>Tường lửa ứng dụng web (WAF) chặn SQL injection, XSS, path traversal. Kết hợp fail2ban + security
+                    headers + file integrity monitor.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon purple">⚡</div>
+                <h3>Performance Tối Ưu</h3>
+                <p>OPcache 256MB, gzip level 6, browser cache 365 ngày, PHP-FPM auto-tuning theo RAM. Đạt TTFB &lt; 0.5s
+                    cho WooCommerce.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon orange">🔄</div>
+                <h3>Backup Tự Động</h3>
+                <p>Backup database + configs hàng ngày. Sync cross-VPS cho redundancy. Malware scan file PHP. Giữ 7 ngày
+                    backup tự xoá cũ.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon cyan">📡</div>
+                <h3>Telegram Monitoring</h3>
+                <p>Cảnh báo real-time qua Telegram: site down, file bị sửa đổi, backup lỗi, update thành công/rollback.
+                    Kiểm tra mỗi 5 phút.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon red">🔗</div>
+                <h3>VPS Cluster Sync</h3>
+                <p>Liên kết nhiều VPS thành cluster. Sync backup, config, migrate site giữa các VPS. Health check toàn
+                    bộ cluster từ bất kỳ node nào.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon red">🔍</div>
+                <h3>Malware Scanner 12 Bước</h3>
+                <p>Quét WPCode snippets, backdoor, file ẩn, shell injection, uploads malware, wp-config tampering,
+                    cron injection, fake admin users — tự động xóa mã độc.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon orange">🔥</div>
+                <h3>Firewall Hardening</h3>
+                <p>Kernel tuning SYN flood, UFW/firewalld auto-config, fail2ban 5 jails, SSH hardening, Nginx DDoS
+                    protection, auto-update OS, change root password.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon purple">🌐</div>
+                <h3>Multi-IP Management</h3>
+                <p>VPS có nhiều IP? Gán IP riêng cho từng website qua nginx listen directive. Hiện tất cả IPs,
+                    bind/unbind, verify. Auto-backup + rollback.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section class="section scroll-reveal">
+        <span class="section-label">So sánh</span>
+        <h2>Vượt Trội Hơn HocVPS</h2>
+        <p class="section-desc">Kế thừa tinh thần "1 chạm" của HocVPS Script, mở rộng với tính năng bảo mật & tự động
+            hóa hiện đại.</p>
+
+        <div class="comparison-section">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Tính năng</th>
+                        <th>HocVPS Script</th>
+                        <th>VPS 1 Chạm ⭐</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Thêm/Xoá website</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> + auto WordPress</td>
+                    </tr>
+                    <tr>
+                        <td>Quản lý Database</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> + import/export SQL</td>
+                    </tr>
+                    <tr>
+                        <td>SSL Let's Encrypt</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> + kiểm tra hạn</td>
+                    </tr>
+                    <tr>
+                        <td>Backup/Restore</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> + cross-VPS sync</td>
+                    </tr>
+                    <tr>
+                        <td>Menu quản trị SSH</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> 9 menu có màu</td>
+                    </tr>
+                    <tr>
+                        <td>WAF tường lửa web</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> <span class="new-badge">MỚI</span></td>
+                    </tr>
+                    <tr>
+                        <td>File Integrity Monitor</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> <span class="new-badge">MỚI</span></td>
+                    </tr>
+                    <tr>
+                        <td>Telegram cảnh báo</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> <span class="new-badge">MỚI</span></td>
+                    </tr>
+                    <tr>
+                        <td>Auto-update + Rollback</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> <span class="new-badge">MỚI</span></td>
+                    </tr>
+                    <tr>
+                        <td>DB Deep Optimizer</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> <span class="new-badge">MỚI</span></td>
+                    </tr>
+                    <tr>
+                        <td>SEO mu-plugin</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> OG, Schema, Canonical</td>
+                    </tr>
+                    <tr>
+                        <td>VPS Cluster Sync</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> Migrate site giữa VPS</td>
+                    </tr>
+                    <tr>
+                        <td>Speed Test tích hợp</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> TTFB tất cả sites</td>
+                    </tr>
+                    <tr>
+                        <td>Plugin management</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> List/Enable/Disable</td>
+                    </tr>
+                    <tr>
+                        <td>Multi-IP binding</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> Gán IP riêng cho site <span class="new-badge">MỚI</span></td>
+                    </tr>
+                    <tr>
+                        <td>Input validation bảo mật</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> 39 validations chống injection <span
+                                class="new-badge">MỚI</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Admin Menu -->
+    <section class="section scroll-reveal" id="admin">
+        <span class="section-label">Quản trị</span>
+        <h2>11 Menu Quản Trị Chuyên Nghiệp</h2>
+        <p class="section-desc">Gõ <code
+                style="background:#1e293b;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace">vps-admin</code>
+            trong SSH để mở menu tương tác đầy màu sắc.</p>
+
+        <div class="menu-grid">
+            <div class="menu-item">
+                <span class="menu-num">1</span>
+                <div>
+                    <h4>🌐 Website</h4>
+                    <p>Thêm/xoá site, redirect domain, phân quyền, maintenance mode, quản lý plugin</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">2</span>
+                <div>
+                    <h4>🗄️ Database</h4>
+                    <p>Tạo/xoá DB, xem credentials, optimize, import/export file SQL</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">3</span>
+                <div>
+                    <h4>🔒 SSL</h4>
+                    <p>Cấp SSL Let's Encrypt, gia hạn tất cả, kiểm tra ngày hết hạn</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">4</span>
+                <div>
+                    <h4>💾 Backup</h4>
+                    <p>Backup ngay, xem danh sách, restore từ file, sync lên cluster</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">5</span>
+                <div>
+                    <h4>🛡️ Bảo Mật</h4>
+                    <p>WAF stats, integrity check, fail2ban, ban/unban IP, xem tấn công</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">6</span>
+                <div>
+                    <h4>⚡ Hiệu Năng</h4>
+                    <p>Speed test TTFB, PHP-FPM status, OPcache, restart services</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">7</span>
+                <div>
+                    <h4>🔗 Cluster</h4>
+                    <p>Thêm/xoá VPS, sync config & backup, migrate site, health check</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">8</span>
+                <div>
+                    <h4>📊 Giám Sát</h4>
+                    <p>Status all sites, error logs, nginx logs, disk usage, test Telegram</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">9</span>
+                <div>
+                    <h4>⚙️ Hệ Thống</h4>
+                    <p>System info, cập nhật OS, restart services, cấu hình Telegram/cron</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">10</span>
+                <div>
+                    <h4>⚡ Quick Tools</h4>
+                    <p>Malware scan, firewall hardening, disk cleanup, swap management, resource alerts, WP bulk ops,
+                        credentials, change root password</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">11</span>
+                <div>
+                    <h4>🌐 Multi-IP</h4>
+                    <p>Hiện tất cả IPs, gán IP cho site, gỡ binding, verify connections qua từng IP</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Install Steps -->
+    <section class="section scroll-reveal" id="install">
+        <span class="section-label">Cài đặt</span>
+        <h2>2 Bước — 5 Phút</h2>
+        <p class="section-desc">Chỉ cần 1 VPS (Rocky Linux 8/9 hoặc Ubuntu 22.04+) với 2GB RAM. Không cần tải gì.</p>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Chạy lệnh cài đặt</h3>
+                <p>SSH vào VPS, chạy 1 lệnh duy nhất. Script tự detect và cài đặt.</p>
+                <code>curl -sL https://qltro.com/api/vps-download | bash</code>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Trỏ DNS & dùng</h3>
+                <p>Trỏ domain về IP VPS (khuyến nghị dùng Cloudflare). Truy cập domain để cài WordPress.</p>
+                <code>vps-admin  # Mở menu quản trị</code>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cron Schedule -->
+    <section class="section scroll-reveal">
+        <span class="section-label">Tự động hóa</span>
+        <h2>Chạy 24/7 Không Cần Quản Lý</h2>
+        <p class="section-desc">Sau khi cài đặt, mọi thứ tự động. Bạn chỉ cần check Telegram.</p>
+
+        <div class="comparison-section">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Script</th>
+                        <th>Chức năng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Mỗi 5 phút</td>
+                        <td>site_monitor.sh</td>
+                        <td>Kiểm tra uptime → cảnh báo Telegram nếu down</td>
+                    </tr>
+                    <tr>
+                        <td>2:00 AM hàng ngày</td>
+                        <td>backup_full.sh</td>
+                        <td>Backup DB + configs + sync cross-VPS</td>
+                    </tr>
+                    <tr>
+                        <td>6:00 AM hàng ngày</td>
+                        <td>integrity_check.sh</td>
+                        <td>Phát hiện file bị sửa đổi, mã độc trong uploads</td>
+                    </tr>
+                    <tr>
+                        <td>3:30 AM Chủ Nhật</td>
+                        <td>db_deep_optimize.sh</td>
+                        <td>Dọn revisions, spam, transients, optimize tables</td>
+                    </tr>
+                    <tr>
+                        <td>5:00 AM Chủ Nhật</td>
+                        <td>wp_auto_update.sh</td>
+                        <td>Update plugin/theme + auto rollback nếu lỗi</td>
+                    </tr>
+                    <tr>
+                        <td>8:00 AM Thứ Hai</td>
+                        <td>broken_link_check.sh</td>
+                        <td>Kiểm tra link hỏng trên sitemap</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+
+    <!-- Smart Update -->
+    <section class="section scroll-reveal" id="smart-update">
+        <span class="section-label">Thông minh</span>
+        <h2>Smart Install &amp; Auto Update</h2>
+        <p class="section-desc">Không cần VPS trắng. Script tự nhận diện hệ thống hiện tại, chỉ cài thêm phần thiếu —
+            hoạt động song song với mọi control panel.</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon green">🔍</div>
+                <h3>System Audit</h3>
+                <p>Quét toàn bộ 15 components: Nginx, PHP, MariaDB, Redis, fail2ban, SSL, WP-CLI, WAF, backup,
+                    monitoring... Hiển thị bảng trạng thái chi tiết với phiên bản.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon blue">🧠</div>
+                <h3>Smart Detection</h3>
+                <p>Tự nhận diện panel đã cài: HocVPS, aaPanel, CyberPanel, HestiaCP, CloudPanel, CWP. Có rồi thì SKIP,
+                    thiếu gì cài nấy — không đụng config hiện tại.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon purple">⬆️</div>
+                <h3>1-Click Update</h3>
+                <p>Chạy <code
+                        style="background:#1e293b;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update update</code>
+                    để nâng cấp. So sánh version, download scripts mới, cài components thiếu — tự backup trước khi
+                    update.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon cyan">🔗</div>
+                <h3>Tương Thích 100%</h3>
+                <p>Chạy song song với HocVPS, aaPanel, CyberPanel mà không xung đột. Chỉ thêm tính năng chứ không thay
+                    đổi cấu trúc có sẵn. Admin panel riêng biệt.</p>
+            </div>
+        </div>
+
+        <div class="comparison-section" style="margin-top:2rem">
+            <h3 style="font-size:1.2rem;margin-bottom:1.5rem">📋 6 Chế Độ Hoạt Động</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Lệnh</th>
+                        <th>Mô tả</th>
+                        <th>Khi nào dùng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code
+                                style="color:#10b981;font-family:'JetBrains Mono',monospace;font-size:0.85rem">curl ... | bash</code>
+                        </td>
+                        <td>Auto-detect mode</td>
+                        <td>Tự phát hiện VPS trắng hay có sẵn, chọn mode phù hợp</td>
+                    </tr>
+                    <tr>
+                        <td><code
+                                style="color:#10b981;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update smart</code>
+                        </td>
+                        <td>Smart Install</td>
+                        <td>VPS đang chạy — chỉ cài thêm phần thiếu</td>
+                    </tr>
+                    <tr>
+                        <td><code
+                                style="color:#10b981;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update update</code>
+                        </td>
+                        <td>Update</td>
+                        <td>Đã cài script — nâng cấp lên version mới</td>
+                    </tr>
+                    <tr>
+                        <td><code
+                                style="color:#10b981;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update audit</code>
+                        </td>
+                        <td>System Audit</td>
+                        <td>Chỉ quét và hiển thị trạng thái, không cài gì</td>
+                    </tr>
+                    <tr>
+                        <td><code
+                                style="color:#ef4444;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update malware-scan</code>
+                        </td>
+                        <td>🛡️ Malware Scanner</td>
+                        <td>Quét WPCode, theme, uploads, wp-config, cron — tự động xóa mã độc</td>
+                    </tr>
+                    <tr>
+                        <td><code>vps-update firewall</code></td>
+                        <td>&#x1F525; Firewall Hardening</td>
+                        <td>Tường lửa + fail2ban + SSH hardening + DDoS protection + kernel tuning</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Compatibility -->
+    <section class="section scroll-reveal" id="compatibility">
+        <span class="section-label">Tương thích</span>
+        <h2>Hoạt Động Song Song</h2>
+        <p class="section-desc">Khác với các script truyền thống, VPS 1 Chạm không "chiếm" hệ thống. Cài thêm mà không
+            ảnh hưởng setup hiện có.</p>
+
+        <div class="menu-grid">
+            <div class="menu-item">
+                <span class="menu-num">✓</span>
+                <div>
+                    <h4>HocVPS Script</h4>
+                    <p>Giữ nguyên menu HocVPS, thêm WAF, monitoring, backup cross-VPS, admin panel mở rộng</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">✓</span>
+                <div>
+                    <h4>aaPanel / BT Panel</h4>
+                    <p>Bổ sung WAF rules, Telegram alerts, file integrity — không đụng giao diện web panel</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">✓</span>
+                <div>
+                    <h4>CyberPanel / OpenLiteSpeed</h4>
+                    <p>Thêm backup automation, security headers, monitoring cron — tương thích OLS</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">✓</span>
+                <div>
+                    <h4>HestiaCP / CloudPanel</h4>
+                    <p>Bổ sung CLI admin, WAF, Telegram bot — panel web vẫn hoạt động bình thường</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">✓</span>
+                <div>
+                    <h4>Manual LEMP Setup</h4>
+                    <p>Tự cài Nginx + PHP + MariaDB? Script detect có sẵn, chỉ thêm WAF + backup + admin</p>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span class="menu-num">✓</span>
+                <div>
+                    <h4>VPS Trắng (Fresh)</h4>
+                    <p>Chưa có gì? Full install mode — cài toàn bộ stack từ đầu trong 5 phút</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta scroll-reveal" id="download">
+        <div class="cta-content">
+            <h2>Bắt Đầu Ngay — Miễn Phí</h2>
+            <p>Chạy 1 lệnh duy nhất trên VPS để cài đặt mọi thứ</p>
+
+            <div class="copy-box">
+                <span id="copy-text">curl -sL https://qltro.com/api/vps-download | bash</span>
+                <button class="copy-btn" onclick="copyCmd()">📋 Copy</button>
+            </div>
+
+            <p style="margin-top:1rem;color:var(--text-muted);font-size:0.85rem">⚠️ Anti-spam: giới hạn 1 lần/phút cho
+                mỗi IP</p>
+
+            <!-- Source Review -->
+            <div
+                style="margin-top:2.5rem;text-align:left;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.5rem">
+                <h3 style="font-size:1.1rem;margin-bottom:1rem">🔍 Review Source Code</h3>
+                <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem">Không tin? Đọc toàn bộ source
+                    trước khi chạy. 100% mã nguồn mở, không obfuscate.</p>
+                <div style="display:flex;flex-direction:column;gap:0.75rem">
+                    <div
+                        style="display:flex;align-items:center;gap:0.75rem;background:#0f172a;padding:0.75rem 1rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem">
+                        <span style="color:#64748b">📄</span>
+                        <a href="/vps/scripts/install.sh" target="_blank"
+                            style="color:#38bdf8;text-decoration:none">install.sh</a>
+                        <span style="color:#64748b;font-size:0.8rem">— Smart installer + malware scanner (main
+                            script)</span>
+                    </div>
+                    <div
+                        style="display:flex;align-items:center;gap:0.75rem;background:#0f172a;padding:0.75rem 1rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem">
+                        <span style="color:#64748b">📄</span>
+                        <a href="/vps/scripts/vps-setup.sh" target="_blank"
+                            style="color:#38bdf8;text-decoration:none">vps-setup.sh</a>
+                        <span style="color:#64748b;font-size:0.8rem">— VPS setup (Nginx, PHP, MariaDB, SSL...)</span>
+                    </div>
+                    <div
+                        style="display:flex;align-items:center;gap:0.75rem;background:#0f172a;padding:0.75rem 1rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem">
+                        <span style="color:#64748b">📄</span>
+                        <a href="/vps/scripts/vps-admin.sh" target="_blank"
+                            style="color:#38bdf8;text-decoration:none">vps-admin.sh</a>
+                        <span style="color:#64748b;font-size:0.8rem">— Admin panel (quản trị, monitoring, backup)</span>
+                    </div>
+                </div>
+                <p style="color:#64748b;font-size:0.8rem;margin-top:1rem">💡 Tip: Chạy <code
+                        style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#10b981">curl -sL https://qltro.com/api/vps-download</code>
+                    (không có <code
+                        style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#f59e0b">| bash</code>) để xem
+                    nội dung script trước.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Schema -->
+    <section class="section scroll-reveal" id="faq">
+        <span class="section-label">FAQ</span>
+        <h2>Câu Hỏi Thường Gặp</h2>
+
+        <div style="max-width:700px">
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">Script có an toàn không?</summary>
+                <p style="color:var(--text-muted);margin-top:1rem">Có. Toàn bộ mã nguồn mở, có thể kiểm tra trước khi
+                    chạy. Script không gửi dữ liệu ra ngoài, ngoại trừ Telegram alert (nếu bạn cấu hình).</p>
+            </details>
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">Hỗ trợ hệ điều hành nào?</summary>
+                <p style="color:var(--text-muted);margin-top:1rem">Rocky Linux 8/9 (khuyến nghị), AlmaLinux 8/9, Ubuntu
+                    22.04, Ubuntu 24.04. VPS cần ít nhất 2GB RAM và 10GB ổ đĩa.</p>
+            </details>
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">Khác gì HocVPS Script?</summary>
+                <p style="color:var(--text-muted);margin-top:1rem">Mạnh hơn HocVPS ở: WAF bảo mật, file integrity
+                    monitor, Telegram cảnh báo real-time, auto-update plugin có rollback, VPS cluster sync, SEO tự động,
+                    speed test tích hợp. Giữ nguyên tính dễ dùng.</p>
+            </details>
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">Có cần biết Linux để dùng không?
+                </summary>
+                <p style="color:var(--text-muted);margin-top:1rem">Không cần chuyên sâu. Chỉ cần biết SSH vào VPS. Menu
+                    quản trị hoàn toàn bằng tiếng Việt, đánh số rõ ràng, chỉ cần chọn số.</p>
+            </details>
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">Migrate từ HocVPS có được không?
+                </summary>
+                <p style="color:var(--text-muted);margin-top:1rem">Được. Bạn chỉ cần backup dữ liệu từ VPS cũ (database
+                    + wp-content), cài script lên VPS mới, import lại. Script có sẵn chức năng import SQL trong menu
+                    Database.</p>
+            </details>
+        </div>
+    </section>
+
+    <!-- FAQ Schema JSON-LD -->
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "Script quản trị VPS 1 chạm có an toàn không?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Có. Toàn bộ mã nguồn mở, có thể kiểm tra trước khi chạy. Script không gửi dữ liệu ra ngoài."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Script hỗ trợ hệ điều hành nào?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Rocky Linux 8/9, AlmaLinux 8/9, Ubuntu 22.04, Ubuntu 24.04. VPS cần ít nhất 2GB RAM."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Script khác gì HocVPS?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Mạnh hơn ở: WAF, file integrity, Telegram alert, auto-update có rollback, VPS cluster sync, SEO tự động."
+            }
+        }
+    ]
+}
+</script>
+
+    <footer>
+        <p>Made with ❤️ by <a href="https://qltro.com">QLTro.com</a> &mdash; Script Quản Trị VPS 1 Chạm</p>
+        <p style="margin-top:8px">Hỗ trợ: Rocky Linux, AlmaLinux, Ubuntu &bull; Nginx &bull; PHP 8 &bull; MariaDB &bull;
+            WordPress &bull; WooCommerce</p>
+    </footer>
+
+    <script>
+        // Copy command
+        function copyCmd() {
+            const text = document.getElementById('copy-text').textContent;
+            navigator.clipboard.writeText(text);
+            const btn = document.querySelector('.copy-btn');
+            btn.textContent = '✓ Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2000);
+        }
+
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+    </script>
+
+</body>
+
+</html>
