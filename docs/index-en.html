@@ -739,6 +739,52 @@
                 gap: 12px;
             }
         }
+    
+        /* Feature Details */
+        .feature-card details {
+            margin-top: 1rem;
+            border-top: 1px solid var(--border);
+            padding-top: 0.75rem;
+        }
+        .feature-card details summary {
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--accent);
+            user-select: none;
+            list-style: none;
+        }
+        .feature-card details summary::before {
+            content: '▶ ';
+            font-size: 0.7rem;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+        .feature-card details[open] summary::before {
+            transform: rotate(90deg);
+        }
+        .feature-card details summary::-webkit-details-marker { display: none; }
+        .detail-box {
+            margin-top: 0.75rem;
+            padding: 1rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            line-height: 1.7;
+        }
+        .detail-box p {
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+        .detail-box p:last-child { margin-bottom: 0; }
+        .detail-box strong { color: var(--text); }
+        .detail-box code {
+            background: rgba(59,130,246,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.78rem;
+        }
+
     </style>
 </head>
 
@@ -808,6 +854,14 @@
                 <h3>Multi-site WordPress</h3>
                 <p>Create unlimited websites on a single VPS. Auto-installs WordPress, creates database, configures
                     Nginx, SSL — just enter the domain name.</p>
+                <details><summary>📋 What each option does</summary><div class="detail-box">
+<p><strong>✅ Add new website</strong> — Enter domain name → auto-creates folder, database, WordPress install, Nginx config. Nothing else is touched.</p>
+<p><strong>⚠️ Remove website</strong> — Creates a full backup FIRST (files + database), then removes Nginx config. Backup saved at <code>/backup/removed/</code>. Your data is NOT lost.</p>
+<p><strong>✅ Add redirect</strong> — Redirects one domain to another (e.g. old-site.com → new-site.com). No data is modified.</p>
+<p><strong>✅ Fix permissions</strong> — Resets file ownership and chmod (755 folders, 644 files). Does NOT delete anything.</p>
+<p><strong>✅ Maintenance mode</strong> — Toggles a temporary maintenance page. One click ON, one click OFF.</p>
+<p><strong>✅ Plugin management</strong> — List, enable, or disable plugins by renaming folders. No plugins are deleted.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon green">🗄️</div>
@@ -815,84 +869,174 @@
                 <p>Dumps <strong>each MySQL table individually</strong> for heavy databases. SHA256 checksum, 3 retries
                     on failure. Battle-tested: <strong>119 tables, 44MB (583MB uncompressed)</strong> — dump 4s, restore
                     26s, 100% accurate.</p>
+                <details><summary>📋 What each option does</summary><div class="detail-box">
+<p><strong>✅ Automatic (cron)</strong> — Runs daily at 3AM. Dumps each table as a separate .sql.gz file. Generates SHA256 checksum for verification. Retries 3 times on failure. Old backups auto-cleaned after 7 days.</p>
+<p><strong>✅ Manual run</strong> — Same process, triggered from menu. You can watch progress in real-time.</p>
+<p><strong>✅ Safe design</strong> — Uses <code>--single-transaction</code> so the database stays online during backup. No downtime, no data loss, no locking.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon purple">🔄</div>
                 <h3>WP Auto-Update + Rollback <span class="new-badge">NEW</span></h3>
                 <p>Full backup before updating. Updates core, plugins, themes for all sites. Verifies HTTP status
                     post-update — <strong>auto-rollback</strong> if site errors. Results sent via Telegram.</p>
+                <details><summary>📋 What each option does</summary><div class="detail-box">
+<p><strong>Step 1:</strong> ✅ Creates full backup (files + database) BEFORE any update</p>
+<p><strong>Step 2:</strong> ✅ Updates WordPress core, all plugins, all themes for each site</p>
+<p><strong>Step 3:</strong> ✅ Checks HTTP status after update — is the site still responding 200?</p>
+<p><strong>Step 4:</strong> ⚠️ If site returns error → <strong>auto-rollback</strong> from the backup created in Step 1</p>
+<p><strong>Step 5:</strong> ✅ Sends results summary to Telegram (success/failure per site)</p>
+<p>🛡️ <strong>Your site is NEVER left broken</strong> — the rollback is automatic.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon cyan">📟</div>
                 <h3>Resource Alert + Telegram <span class="new-badge">NEW</span></h3>
                 <p>Monitors RAM, Disk, CPU, Swap with custom thresholds. <strong>Telegram alerts</strong> automatically
                     when limits exceeded, 30-minute cooldown to avoid spam. 1-click cron setup.</p>
+                <details><summary>📋 What each option does</summary><div class="detail-box">
+<p><strong>✅ View current status</strong> — Shows RAM %, Disk %, CPU load, Swap, top processes. Color-coded: 🟢 normal, 🟡 warning (&gt;70%), 🔴 critical (&gt;90%).</p>
+<p><strong>✅ Telegram alert (cron)</strong> — Runs every 5 min. Only sends alert when threshold exceeded. 30-min cooldown prevents spam. Just monitoring — changes NOTHING on the server.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon orange">🧹</div>
                 <h3>Smart Disk Cleanup <span class="new-badge">NEW</span></h3>
                 <p><strong>Dry-run first</strong> to preview what will be cleaned. Removes old logs, journal, package
                     cache, WP revisions, transients, spam comments. Shows exact space reclaimed.</p>
+                <details><summary>📋 What each option does — does NOT delete your website!</summary><div class="detail-box">
+<p>🛡️ <strong>This feature only cleans junk files. It does NOT delete your WordPress sites or posts.</strong></p>
+<p><strong>✅ [1] Old logs</strong> — Deletes rotated log files (*.gz, *.1, *.2...) in /var/log. These are old copies, not active logs.</p>
+<p><strong>✅ [2] Package cache</strong> — Clears dnf/apt download cache. Like clearing browser cache — safe.</p>
+<p><strong>✅ [3] WP transients</strong> — Deletes temporary cache entries in WordPress database. WordPress recreates them automatically.</p>
+<p><strong>✅ [4] WP revisions</strong> — Deletes old draft versions of posts. Your PUBLISHED posts are untouched.</p>
+<p><strong>⚠️ [5] Old backups</strong> — Asks before deleting backups older than 30 days. You must confirm.</p>
+<p><strong>✅ [6] Temp files</strong> — Shows /tmp size. Does not auto-delete.</p>
+<p>💡 Always runs <strong>dry-run first</strong> (preview) before asking to execute.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon red">🔑</div>
                 <h3>SSH Key Manager <span class="new-badge">NEW</span></h3>
                 <p>Add/remove SSH keys, validate format (RSA, Ed25519). <strong>Lockout prevention</strong>: won't
                     disable password if no key exists. sshd_config backup + auto-rollback on validation error.</p>
+                <details><summary>📋 What each option does</summary><div class="detail-box">
+<p><strong>✅ Add SSH key</strong> — Paste your public key → validates format (RSA/Ed25519) → adds to authorized_keys.</p>
+<p><strong>✅ Remove SSH key</strong> — Select which key to remove from the list.</p>
+<p><strong>✅ Disable password login</strong> — Only works if at least one SSH key exists. <strong>Won't lock you out.</strong></p>
+<p><strong>✅ Backup sshd_config</strong> — Always backs up before changes. Auto-rollback if SSH test fails.</p>
+<p>🛡️ <strong>Lockout prevention</strong>: the script checks SSH connectivity before applying changes.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon green">🩺</div>
                 <h3>Domain Health Dashboard <span class="new-badge">NEW</span></h3>
                 <p>Single command displays a <strong>full dashboard</strong>: HTTP status, SSL expiry, TTFB, database
                     size, disk usage — for all sites on the VPS. Color-coded for clarity.</p>
+                <details><summary>📋 What each option does</summary><div class="detail-box">
+<p><strong>✅ View only</strong> — This is a read-only dashboard. It checks and displays, but changes NOTHING.</p>
+<p>Shows for each domain: HTTP status, SSL expiry date, TTFB speed, database size, disk usage.</p>
+<p>Color-coded: 🟢 good | 🟡 expiring soon | 🔴 error or expired.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon purple">🚧</div>
                 <h3>WordPress Staging <span class="new-badge">NEW</span></h3>
                 <p>Clone WordPress to <strong>staging.domain.com</strong> (files + DB). Auto search-replace domain in
                     DB. Protected by .htpasswd. Safe staging deletion with regex validation.</p>
+                <details><summary>📋 What each option does</summary><div class="detail-box">
+<p><strong>✅ Create staging</strong> — Clones your site to staging.domain.com (separate copy of files + database). Your original site is untouched.</p>
+<p><strong>✅ Auto search-replace</strong> — Updates domain references in the staging DB so links work correctly.</p>
+<p><strong>✅ Password protected</strong> — Staging site is behind .htpasswd, not publicly accessible.</p>
+<p><strong>⚠️ Delete staging</strong> — Only deletes the staging copy. Original site is never affected.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon cyan">📊</div>
                 <h3>Simple Analytics <span class="new-badge">NEW</span></h3>
                 <p>Analyze nginx access logs: <strong>top pages, IPs, bandwidth, bot vs human, 404 errors, HTTP status
                         codes</strong>. No Google Analytics or external tools needed.</p>
+                <details><summary>📋 What each option does</summary><div class="detail-box">
+<p><strong>✅ Read-only analysis</strong> — Reads nginx access log files. Does NOT install any tracking code or external tools.</p>
+<p>Shows: top pages, visitor IPs, bandwidth usage, bot vs human traffic, 404 errors, HTTP status breakdown.</p>
+<p>💡 Privacy-friendly: all data stays on your server, nothing sent externally.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon green">🛡️</div>
                 <h3>WAF & Security</h3>
                 <p>Web Application Firewall (WAF) blocks SQL injection, XSS, path traversal. Combined with fail2ban +
                     security headers + file integrity monitor.</p>
+                <details><summary>📋 What each option does</summary><div class="detail-box">
+<p><strong>✅ WAF status</strong> — Shows how many malicious requests were blocked today. View only.</p>
+<p><strong>✅ Integrity check</strong> — Compares WordPress core files against official checksums. Reports suspicious changes but does NOT auto-delete.</p>
+<p><strong>✅ fail2ban status</strong> — Shows which IPs are currently banned. View only.</p>
+<p><strong>✅ Ban/Unban IP</strong> — Manually block or unblock a specific IP address.</p>
+<p><strong>✅ Recent attacks</strong> — Shows last 20 blocked requests. View only.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon orange">🔄</div>
                 <h3>Automated Backup</h3>
                 <p>Daily database + config backups. Cross-VPS sync for redundancy. PHP file malware scanning. 7-day
                     retention with auto-cleanup.</p>
+                <details><summary>📋 What each option does</summary><div class="detail-box">
+<p><strong>✅ Run full backup</strong> — Dumps all databases + copies config files to /backup/. Nothing is deleted or modified.</p>
+<p><strong>✅ List backups</strong> — Shows existing backup files with dates and sizes.</p>
+<p><strong>⚠️ Restore database</strong> — Imports a SQL file into a specific database. You choose which DB. Does NOT auto-overwrite.</p>
+<p><strong>✅ Sync to backup VPS</strong> — Copies backups to another VPS via rsync. Source backups remain intact.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon red">🔗</div>
                 <h3>VPS Cluster Sync</h3>
                 <p>Link multiple VPS servers into a cluster. Sync backups, configs, migrate sites between VPS nodes.
                     Cluster-wide health checks from any node.</p>
+                <details><summary>📋 What each option does</summary><div class="detail-box">
+<p><strong>✅ Add/Remove VPS</strong> — Register or unregister a VPS node in the cluster. Requires SSH key setup.</p>
+<p><strong>✅ Sync configs</strong> — Copies Nginx configs and scripts to other nodes as backup reference. Does NOT auto-apply on remote.</p>
+<p><strong>✅ Sync backups</strong> — Copies backup files to all other nodes via rsync. Source remains intact.</p>
+<p><strong>✅ Migrate site</strong> — <strong>Copies</strong> (not moves) a site to another VPS: files + DB + Nginx config. Original site stays running.</p>
+<p><strong>✅ Health check</strong> — Shows RAM, Disk, Load for all nodes. Read-only.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon red">🔍</div>
                 <h3>12-Step Malware Scanner</h3>
                 <p>Scans WPCode snippets, backdoors, hidden files, shell injection, uploads malware, wp-config
                     tampering, cron injection, fake admin users — auto-removes threats.</p>
+                <details><summary>📋 What each option does — does NOT delete WordPress!</summary><div class="detail-box">
+<p>🛡️ <strong>The scanner quarantines suspicious files — it does NOT delete WordPress core files.</strong></p>
+<p><strong>✅ Scans for:</strong> backdoors, shell injections, hidden PHP files in uploads, wp-config tampering, fake admin users, suspicious cron jobs, WPCode snippet injections.</p>
+<p><strong>✅ Quarantine:</strong> Suspicious files are MOVED to <code>/root/.quarantine/</code>, not deleted. You can review and restore them.</p>
+<p><strong>✅ Report:</strong> Full scan report with findings. You decide what to do.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon orange">🔥</div>
                 <h3>Firewall Hardening</h3>
                 <p>Kernel tuning for SYN flood, UFW/firewalld auto-config, fail2ban with 5 jails, SSH hardening, Nginx
                     DDoS protection, auto-update OS, change root password.</p>
+                <details><summary>📋 What each option does</summary><div class="detail-box">
+<p><strong>✅ Kernel tuning</strong> — Optimizes TCP/SYN flood protection parameters. Does not affect services.</p>
+<p><strong>✅ UFW/firewalld</strong> — Auto-configures firewall to allow SSH(22), HTTP(80), HTTPS(443). Blocks other ports.</p>
+<p><strong>✅ fail2ban</strong> — Sets up 5 jails (SSH, Nginx) to auto-ban brute-force IPs. Temporary bans only.</p>
+<p><strong>✅ SSH hardening</strong> — Disables root password login (only if SSH key exists), changes default settings.</p>
+<p><strong>✅ Nginx DDoS protection</strong> — Rate limiting for requests. Legitimate users unaffected.</p>
+<p>🛡️ <strong>Backs up all configs before changes.</strong> SSH access is tested before finalizing.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon purple">🌐</div>
                 <h3>Multi-IP Management</h3>
                 <p>Multiple IPs on your VPS? Assign specific IPs to specific websites via nginx listen directive. View
                     all IPs, bind/unbind, verify. Auto-backup + rollback.</p>
+                <details><summary>📋 What each option does</summary><div class="detail-box">
+<p><strong>✅ View all IPs</strong> — Lists all IP addresses on the VPS. Read-only.</p>
+<p><strong>✅ Bind IP to site</strong> — Assigns a specific IP to a website via Nginx listen directive. Auto-backup config before change.</p>
+<p><strong>✅ Unbind IP</strong> — Reverts to default (listen on all IPs). Auto-backup + rollback on error.</p>
+<p><strong>✅ Verify</strong> — Tests that the binding works correctly.</p>
+</div></details>
             </div>
         </div>
     </section>

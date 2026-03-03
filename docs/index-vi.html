@@ -719,6 +719,52 @@
                 gap: 12px;
             }
         }
+    
+        /* Feature Details */
+        .feature-card details {
+            margin-top: 1rem;
+            border-top: 1px solid var(--border);
+            padding-top: 0.75rem;
+        }
+        .feature-card details summary {
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--accent);
+            user-select: none;
+            list-style: none;
+        }
+        .feature-card details summary::before {
+            content: '▶ ';
+            font-size: 0.7rem;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+        .feature-card details[open] summary::before {
+            transform: rotate(90deg);
+        }
+        .feature-card details summary::-webkit-details-marker { display: none; }
+        .detail-box {
+            margin-top: 0.75rem;
+            padding: 1rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            line-height: 1.7;
+        }
+        .detail-box p {
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+        .detail-box p:last-child { margin-bottom: 0; }
+        .detail-box strong { color: var(--text); }
+        .detail-box code {
+            background: rgba(59,130,246,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.78rem;
+        }
+
     </style>
 </head>
 
@@ -790,6 +836,14 @@
                 <h3>Multi-site WordPress</h3>
                 <p>Tạo không giới hạn website trên 1 VPS. Tự động cài WordPress, tạo database, cấu hình Nginx, SSL — chỉ
                     cần nhập tên domain.</p>
+                <details><summary>📋 Chi tiết: từng option làm gì?</summary><div class="detail-box">
+<p><strong>✅ Thêm website mới</strong> — Nhập domain → tự tạo thư mục, database, cài WordPress, cấu hình Nginx. Không ảnh hưởng site khác.</p>
+<p><strong>⚠️ Xóa website</strong> — TẠO BACKUP TRƯỚC (file + database), sau đó mới xóa config Nginx. Backup lưu tại <code>/backup/removed/</code>. Dữ liệu KHÔNG bị mất.</p>
+<p><strong>✅ Thêm redirect</strong> — Chuyển hướng domain cũ sang domain mới. Không sửa dữ liệu.</p>
+<p><strong>✅ Sửa quyền file</strong> — Reset ownership và chmod (755 thư mục, 644 file). KHÔNG xóa gì.</p>
+<p><strong>✅ Chế độ bảo trì</strong> — Bật/tắt trang bảo trì. Nhấn 1 lần bật, nhấn lại tắt.</p>
+<p><strong>✅ Quản lý plugin</strong> — Xem, bật, tắt plugin bằng đổi tên thư mục. KHÔNG xóa plugin.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon green">🗄️</div>
@@ -803,48 +857,100 @@
                 <h3>WP Auto-Update + Rollback <span class="new-badge">MỚI</span></h3>
                 <p>Tự backup toàn bộ trước khi update. Update core, plugins, themes cho tất cả sites. Verify HTTP status
                     sau update — <strong>auto-rollback</strong> nếu site lỗi. Thông báo kết quả qua Telegram.</p>
+                <details><summary>📋 Chi tiết: quy trình cập nhật</summary><div class="detail-box">
+<p><strong>Bước 1:</strong> ✅ Tạo backup đầy đủ (file + database) TRƯỚC KHI cập nhật</p>
+<p><strong>Bước 2:</strong> ✅ Update WordPress core, tất cả plugin, tất cả theme cho mỗi site</p>
+<p><strong>Bước 3:</strong> ✅ Kiểm tra HTTP status sau update — site có trả về 200 không?</p>
+<p><strong>Bước 4:</strong> ⚠️ Nếu site lỗi → <strong>tự động rollback</strong> từ backup ở Bước 1</p>
+<p><strong>Bước 5:</strong> ✅ Gửi kết quả tóm tắt qua Telegram (thành công/thất bại từng site)</p>
+<p>🛡️ <strong>Site KHÔNG BAO GIỜ bị hỏng</strong> — rollback là tự động.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon cyan">📟</div>
                 <h3>Resource Alert + Telegram <span class="new-badge">MỚI</span></h3>
                 <p>Giám sát RAM, Disk, CPU, Swap theo ngưỡng tùy chỉnh. <strong>Cảnh báo Telegram</strong> tự động khi
                     vượt mức, cooldown 30 phút tránh spam. Setup cron 1 click.</p>
+                <details><summary>📋 Chi tiết: từng option làm gì?</summary><div class="detail-box">
+<p><strong>✅ Xem trạng thái hiện tại</strong> — Hiển thị RAM %, Disk %, CPU, Swap, top process. Màu sắc: 🟢 bình thường, 🟡 cảnh báo (&gt;70%), 🔴 nghiêm trọng (&gt;90%).</p>
+<p><strong>✅ Cảnh báo Telegram (cron)</strong> — Chạy mỗi 5 phút. Chỉ gửi khi vượt ngưỡng. Cooldown 30 phút tránh spam. Chỉ theo dõi — KHÔNG thay đổi gì trên server.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon orange">🧹</div>
                 <h3>Disk Cleanup Thông Minh <span class="new-badge">MỚI</span></h3>
                 <p><strong>Dry-run trước</strong> để xem sẽ dọn gì. Xóa logs cũ, journal, package cache, WP revisions,
                     transients, spam comments. Hiển thị chính xác dung lượng thu hồi được.</p>
+                <details><summary>📋 Chi tiết: KHÔNG xóa website hay bài viết!</summary><div class="detail-box">
+<p>🛡️ <strong>Tính năng này chỉ dọn file rác. KHÔNG xóa WordPress, bài viết hay dữ liệu của bạn.</strong></p>
+<p><strong>✅ [1] Log cũ</strong> — Xóa file log đã xoay vòng (*.gz, *.1, *.2...) trong /var/log. Đây là bản cũ, không phải log đang dùng.</p>
+<p><strong>✅ [2] Cache gói cài đặt</strong> — Xóa cache dnf/apt đã tải. Giống xóa cache trình duyệt — an toàn.</p>
+<p><strong>✅ [3] WP transients</strong> — Xóa cache tạm trong database WordPress. WordPress tự tạo lại ngay.</p>
+<p><strong>✅ [4] WP revisions</strong> — Xóa bản nháp cũ của bài viết. Bài đã ĐĂNG vẫn nguyên vẹn.</p>
+<p><strong>⚠️ [5] Backup cũ</strong> — Hỏi trước khi xóa backup quá 30 ngày. Bạn phải xác nhận.</p>
+<p><strong>✅ [6] File tạm</strong> — Hiển thị kích thước /tmp. Không tự xóa.</p>
+<p>💡 Luôn chạy <strong>dry-run trước</strong> (xem trước) rồi mới hỏi có muốn thực hiện không.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon red">🔑</div>
                 <h3>SSH Key Manager <span class="new-badge">MỚI</span></h3>
                 <p>Thêm/xóa SSH key, validate format (RSA, Ed25519). <strong>Chống lockout</strong>: không cho tắt
                     password nếu chưa có key. sshd_config backup + auto-rollback nếu validate lỗi.</p>
+                <details><summary>📋 Chi tiết: từng option làm gì?</summary><div class="detail-box">
+<p><strong>✅ Thêm SSH key</strong> — Dán public key → kiểm tra format (RSA/Ed25519) → thêm vào authorized_keys.</p>
+<p><strong>✅ Xóa SSH key</strong> — Chọn key muốn xóa từ danh sách.</p>
+<p><strong>✅ Tắt đăng nhập password</strong> — Chỉ hoạt động nếu có ít nhất 1 SSH key. <strong>Không khóa bạn ra ngoài.</strong></p>
+<p><strong>✅ Backup sshd_config</strong> — Luôn backup trước khi thay đổi. Tự rollback nếu test SSH thất bại.</p>
+<p>🛡️ <strong>Chống khóa ngoài</strong>: script kiểm tra kết nối SSH trước khi áp dụng thay đổi.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon green">🩺</div>
                 <h3>Domain Health Dashboard <span class="new-badge">MỚI</span></h3>
                 <p>Một lệnh hiển thị <strong>bảng dashboard</strong>: HTTP status, SSL hạn, TTFB, database size, disk
                     usage — cho tất cả site trên VPS. Có color-code rõ ràng.</p>
+                <details><summary>📋 Chi tiết: từng option làm gì?</summary><div class="detail-box">
+<p><strong>✅ Chỉ xem</strong> — Đây là dashboard chỉ đọc. Kiểm tra và hiển thị, KHÔNG thay đổi gì.</p>
+<p>Hiển thị cho mỗi domain: HTTP status, ngày hết hạn SSL, tốc độ TTFB, kích thước database, dung lượng ổ đĩa.</p>
+<p>Màu sắc: 🟢 tốt | 🟡 sắp hết hạn | 🔴 lỗi hoặc hết hạn.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon purple">🚧</div>
                 <h3>WordPress Staging <span class="new-badge">MỚI</span></h3>
                 <p>Clone WordPress sang <strong>staging.domain.com</strong> (files + DB). Auto thay domain trong DB. Bảo
                     vệ bằng .htpasswd. Xóa staging an toàn với regex validate.</p>
+                <details><summary>📋 Chi tiết: từng option làm gì?</summary><div class="detail-box">
+<p><strong>✅ Tạo staging</strong> — Clone site sang staging.domain.com (bản sao riêng file + database). Site gốc KHÔNG bị ảnh hưởng.</p>
+<p><strong>✅ Tự động search-replace</strong> — Cập nhật domain trong DB staging để link hoạt động đúng.</p>
+<p><strong>✅ Bảo vệ mật khẩu</strong> — Staging có .htpasswd, không ai truy cập được nếu không có mật khẩu.</p>
+<p><strong>⚠️ Xóa staging</strong> — Chỉ xóa bản sao staging. Site gốc KHÔNG BAO GIỜ bị ảnh hưởng.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon cyan">📊</div>
                 <h3>Simple Analytics <span class="new-badge">MỚI</span></h3>
                 <p>Phân tích nginx access logs: <strong>top pages, IPs, bandwidth, bot vs human, 404 errors, HTTP status
                         codes</strong>. Không cần Google Analytics hay tool bên ngoài.</p>
+                <details><summary>📋 Chi tiết: từng option làm gì?</summary><div class="detail-box">
+<p><strong>✅ Phân tích chỉ đọc</strong> — Đọc file log nginx. KHÔNG cài đặt code tracking hay công cụ bên ngoài.</p>
+<p>Hiển thị: top trang, IP truy cập, băng thông, bot vs người, lỗi 404, phân tích HTTP status.</p>
+<p>💡 Bảo mật: mọi dữ liệu nằm trên server, không gửi ra ngoài.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon green">🛡️</div>
                 <h3>WAF & Bảo Mật</h3>
                 <p>Tường lửa ứng dụng web (WAF) chặn SQL injection, XSS, path traversal. Kết hợp fail2ban + security
                     headers + file integrity monitor.</p>
+                <details><summary>📋 Chi tiết: từng option làm gì?</summary><div class="detail-box">
+<p><strong>✅ Trạng thái WAF</strong> — Hiển thị số request bị chặn hôm nay. Chỉ xem.</p>
+<p><strong>✅ Kiểm tra toàn vẹn</strong> — So sánh file WordPress core với checksum chính thức. Báo cáo thay đổi đáng ngờ nhưng KHÔNG tự xóa.</p>
+<p><strong>✅ Trạng thái fail2ban</strong> — Hiển thị IP đang bị chặn. Chỉ xem.</p>
+<p><strong>✅ Ban/Unban IP</strong> — Chặn hoặc bỏ chặn IP thủ công.</p>
+<p><strong>✅ Tấn công gần đây</strong> — Hiển thị 20 request bị chặn gần nhất. Chỉ xem.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon orange">🔄</div>
@@ -857,24 +963,51 @@
                 <h3>VPS Cluster Sync</h3>
                 <p>Liên kết nhiều VPS thành cluster. Sync backup, config, migrate site giữa các VPS. Health check toàn
                     bộ cluster từ bất kỳ node nào.</p>
+                <details><summary>📋 Chi tiết: từng option làm gì?</summary><div class="detail-box">
+<p><strong>✅ Thêm/Xóa VPS</strong> — Đăng ký hoặc gỡ VPS khỏi cluster. Cần setup SSH key trước.</p>
+<p><strong>✅ Sync cấu hình</strong> — Copy config Nginx và script sang node khác làm tham chiếu. KHÔNG tự áp dụng trên remote.</p>
+<p><strong>✅ Sync backup</strong> — Copy file backup sang tất cả node qua rsync. Nguồn vẫn nguyên.</p>
+<p><strong>✅ Di chuyển site</strong> — <strong>Copy</strong> (không di chuyển) site sang VPS khác: file + DB + Nginx config. Site gốc vẫn chạy.</p>
+<p><strong>✅ Kiểm tra sức khỏe</strong> — Hiển thị RAM, Disk, Load cho tất cả node. Chỉ xem.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon red">🔍</div>
                 <h3>Malware Scanner 12 Bước</h3>
                 <p>Quét WPCode snippets, backdoor, file ẩn, shell injection, uploads malware, wp-config tampering,
                     cron injection, fake admin users — tự động xóa mã độc.</p>
+                <details><summary>📋 Chi tiết: KHÔNG xóa WordPress!</summary><div class="detail-box">
+<p>🛡️ <strong>Scanner cô lập file nghi ngờ — KHÔNG xóa file WordPress gốc.</strong></p>
+<p><strong>✅ Quét:</strong> backdoor, shell injection, file PHP ẩn trong uploads, wp-config bị sửa, user admin giả, cron job đáng ngờ, WPCode snippet injection.</p>
+<p><strong>✅ Cô lập:</strong> File nghi ngờ được DI CHUYỂN sang <code>/root/.quarantine/</code>, không xóa. Bạn có thể xem lại và khôi phục.</p>
+<p><strong>✅ Báo cáo:</strong> Báo cáo đầy đủ với kết quả. Bạn tự quyết định xử lý.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon orange">🔥</div>
                 <h3>Firewall Hardening</h3>
                 <p>Kernel tuning SYN flood, UFW/firewalld auto-config, fail2ban 5 jails, SSH hardening, Nginx DDoS
                     protection, auto-update OS, change root password.</p>
+                <details><summary>📋 Chi tiết: từng option làm gì?</summary><div class="detail-box">
+<p><strong>✅ Kernel tuning</strong> — Tối ưu tham số chống SYN flood. Không ảnh hưởng dịch vụ.</p>
+<p><strong>✅ UFW/firewalld</strong> — Tự cấu hình firewall cho phép SSH(22), HTTP(80), HTTPS(443). Chặn port khác.</p>
+<p><strong>✅ fail2ban</strong> — Thiết lập 5 jail (SSH, Nginx) tự chặn IP brute-force. Chỉ chặn tạm thời.</p>
+<p><strong>✅ SSH hardening</strong> — Tắt đăng nhập password (chỉ khi đã có SSH key), thay đổi cài đặt mặc định.</p>
+<p><strong>✅ Chống DDoS Nginx</strong> — Giới hạn tốc độ request. Người dùng thường không bị ảnh hưởng.</p>
+<p>🛡️ <strong>Backup toàn bộ config trước khi thay đổi.</strong> Test SSH trước khi hoàn tất.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon purple">🌐</div>
                 <h3>Multi-IP Management</h3>
                 <p>VPS có nhiều IP? Gán IP riêng cho từng website qua nginx listen directive. Hiện tất cả IPs,
                     bind/unbind, verify. Auto-backup + rollback.</p>
+                <details><summary>📋 Chi tiết: từng option làm gì?</summary><div class="detail-box">
+<p><strong>✅ Xem tất cả IP</strong> — Liệt kê tất cả IP trên VPS. Chỉ xem.</p>
+<p><strong>✅ Gán IP cho site</strong> — Gán IP cụ thể cho website qua Nginx listen directive. Tự backup config trước khi thay đổi.</p>
+<p><strong>✅ Bỏ gán IP</strong> — Trở về mặc định (listen trên tất cả IP). Tự backup + rollback nếu lỗi.</p>
+<p><strong>✅ Kiểm tra</strong> — Test xem binding hoạt động đúng không.</p>
+</div></details>
             </div>
         </div>
     </section>

@@ -716,6 +716,52 @@
                 gap: 12px;
             }
         }
+    
+        /* Feature Details */
+        .feature-card details {
+            margin-top: 1rem;
+            border-top: 1px solid var(--border);
+            padding-top: 0.75rem;
+        }
+        .feature-card details summary {
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--accent);
+            user-select: none;
+            list-style: none;
+        }
+        .feature-card details summary::before {
+            content: '▶ ';
+            font-size: 0.7rem;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+        .feature-card details[open] summary::before {
+            transform: rotate(90deg);
+        }
+        .feature-card details summary::-webkit-details-marker { display: none; }
+        .detail-box {
+            margin-top: 0.75rem;
+            padding: 1rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            line-height: 1.7;
+        }
+        .detail-box p {
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+        .detail-box p:last-child { margin-bottom: 0; }
+        .detail-box strong { color: var(--text); }
+        .detail-box code {
+            background: rgba(59,130,246,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.78rem;
+        }
+
     </style>
 </head>
 
@@ -776,6 +822,14 @@
                 <div class="feature-icon blue">🌐</div>
                 <h3>多站点WordPress</h3>
                 <p>在单个VPS上创建无限量网站。自动安装WordPress，创建数据库，配置Nginx，SSL — 只需输入域名。</p>
+                <details><summary>📋 每个选项做什么？</summary><div class="detail-box">
+<p><strong>✅ 添加网站</strong> — 输入域名 → 自动创建文件夹、数据库、安装WordPress、配置Nginx。不影响其他站点。</p>
+<p><strong>⚠️ 删除网站</strong> — 先创建完整备份（文件+数据库），然后才删除Nginx配置。备份保存在 <code>/backup/removed/</code>。数据不会丢失。</p>
+<p><strong>✅ 添加重定向</strong> — 将旧域名重定向到新域名。不修改数据。</p>
+<p><strong>✅ 修复权限</strong> — 重置文件权限（755目录，644文件）。不删除任何东西。</p>
+<p><strong>✅ 维护模式</strong> — 一键开启/关闭维护页面。</p>
+<p><strong>✅ 插件管理</strong> — 查看、启用、禁用插件。不删除插件。</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon green">🗄️</div>
@@ -787,6 +841,14 @@
                 <div class="feature-icon purple">🔄</div>
                 <h3>WP自动更新 + 回滚 <span class="new-badge">新</span></h3>
                 <p>更新前完整备份。批量更新核心、插件、主题。更新后验证HTTP状态 — 网站出错<strong>自动回滚</strong>。结果通过Telegram通知。</p>
+                <details><summary>📋 更新流程详情</summary><div class="detail-box">
+<p><strong>步骤1：</strong> ✅ 更新前创建完整备份（文件+数据库）</p>
+<p><strong>步骤2：</strong> ✅ 更新WordPress核心、所有插件、所有主题</p>
+<p><strong>步骤3：</strong> ✅ 更新后检查HTTP状态——网站是否仍返回200？</p>
+<p><strong>步骤4：</strong> ⚠️ 如果网站出错 → <strong>自动回滚</strong>到步骤1的备份</p>
+<p><strong>步骤5：</strong> ✅ 通过Telegram发送结果摘要</p>
+<p>🛡️ <strong>网站永远不会损坏</strong> — 回滚是自动的。</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon cyan">📟</div>
@@ -797,6 +859,16 @@
                 <div class="feature-icon orange">🧹</div>
                 <h3>智能磁盘清理 <span class="new-badge">新</span></h3>
                 <p><strong>先预览</strong>再清理。删除旧日志、journal、包缓存、WP修订版本、临时数据、垃圾评论。精确显示回收空间。</p>
+                <details><summary>📋 详情：不会删除网站或文章！</summary><div class="detail-box">
+<p>🛡️ <strong>此功能仅清理垃圾文件。不会删除WordPress网站或文章。</strong></p>
+<p><strong>✅ [1] 旧日志</strong> — 删除/var/log中的轮转日志(*.gz, *.1, *.2...)。这些是旧副本，不是活动日志。</p>
+<p><strong>✅ [2] 包缓存</strong> — 清除dnf/apt下载缓存。类似清除浏览器缓存——安全。</p>
+<p><strong>✅ [3] WP临时数据</strong> — 删除WordPress数据库中的临时缓存。WordPress会自动重建。</p>
+<p><strong>✅ [4] WP修订版</strong> — 删除文章的旧草稿版本。已发布的文章不受影响。</p>
+<p><strong>⚠️ [5] 旧备份</strong> — 删除30天前的备份前会询问确认。</p>
+<p><strong>✅ [6] 临时文件</strong> — 显示/tmp大小，不自动删除。</p>
+<p>💡 始终先运行<strong>预览模式</strong>，再询问是否执行。</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon red">🔑</div>
@@ -822,6 +894,13 @@
                 <div class="feature-icon green">🛡️</div>
                 <h3>WAF与安全</h3>
                 <p>Web应用防火墙（WAF）拦截SQL注入、XSS、路径遍历。结合fail2ban + 安全头 + 文件完整性监控。</p>
+                <details><summary>📋 What each option does</summary><div class="detail-box">
+<p><strong>✅ WAF status</strong> — Shows how many malicious requests were blocked today. View only.</p>
+<p><strong>✅ Integrity check</strong> — Compares WordPress core files against official checksums. Reports suspicious changes but does NOT auto-delete.</p>
+<p><strong>✅ fail2ban status</strong> — Shows which IPs are currently banned. View only.</p>
+<p><strong>✅ Ban/Unban IP</strong> — Manually block or unblock a specific IP address.</p>
+<p><strong>✅ Recent attacks</strong> — Shows last 20 blocked requests. View only.</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon orange">🔄</div>
@@ -837,16 +916,26 @@
                 <div class="feature-icon red">🔍</div>
                 <h3>12步恶意软件扫描</h3>
                 <p>扫描WPCode代码段、后门、隐藏文件、shell注入、上传目录恶意软件、wp-config篡改、cron注入、伪管理员账户 — 自动移除威胁。</p>
+                <details><summary>📋 详情：不会删除WordPress！</summary><div class="detail-box">
+<p>🛡️ <strong>扫描器隔离可疑文件——不会删除WordPress核心文件。</strong></p>
+<p><strong>✅ 扫描：</strong>后门、Shell注入、上传目录中的隐藏PHP、wp-config篡改、虚假管理员、可疑cron任务、WPCode代码注入。</p>
+<p><strong>✅ 隔离：</strong>可疑文件被移动到 <code>/root/.quarantine/</code>，不是删除。您可以查看和恢复。</p>
+<p><strong>✅ 报告：</strong>完整扫描报告。由您决定如何处理。</p>
+</div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon orange">🔥</div>
                 <h3>防火墙加固</h3>
                 <p>内核级SYN洪水防护，UFW/firewalld自动配置，fail2ban 5个监控规则，SSH加固，Nginx DDoS防护，自动更新OS，修改root密码。</p>
+            
+                <details><summary>📋 每个选项做什么？</summary><div class="detail-box"><p><strong>✅ 内核调优</strong> — 优化TCP/SYN洪水保护参数。不影响服务。</p><p><strong>✅ UFW/firewalld</strong> — 自动配置防火墙允许SSH(22)、HTTP(80)、HTTPS(443)。</p><p><strong>✅ fail2ban</strong> — 设置5个监狱自动封禁暴力破解IP。仅临时封禁。</p><p>🛡️ <strong>更改前备份所有配置。</strong></p></div></details>
             </div>
             <div class="feature-card">
                 <div class="feature-icon purple">🌐</div>
                 <h3>多IP管理</h3>
                 <p>VPS有多个IP？通过nginx listen指令为每个网站分配独立IP。查看所有IP，绑定/解绑，验证连接。自动备份+回滚。</p>
+            
+                <details><summary>📋 每个选项做什么？</summary><div class="detail-box"><p><strong>✅ 查看所有IP</strong> — 列出VPS上的所有IP。只读。</p><p><strong>✅ 绑定IP到站点</strong> — 通过Nginx listen指令分配IP。更改前自动备份。</p><p><strong>✅ 解绑IP</strong> — 恢复默认。自动备份+出错回滚。</p></div></details>
             </div>
         </div>
     </section>
