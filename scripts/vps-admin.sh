@@ -6,6 +6,18 @@
 
 source /root/.vps-config/setup.conf 2>/dev/null
 
+# ── MySQL Auth Helper ──
+# Uses DB_ROOT_PASS from config; falls back to unix socket auth (no password)
+_mysql_auth=""
+if [ -n "$DB_ROOT_PASS" ]; then
+    _mysql_auth="-uroot -p${DB_ROOT_PASS}"
+else
+    # Try unix socket auth (default on Ubuntu/Debian for root)
+    _mysql_auth="-uroot"
+fi
+_mysql()     { mysql     $_mysql_auth "$@" 2>/dev/null; }
+_mysqldump() { mysqldump $_mysql_auth --single-transaction "$@" 2>/dev/null; }
+
 # Auto-detect SERVER_IP if not set in config
 if [ -z "$SERVER_IP" ]; then
     SERVER_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
@@ -252,7 +264,7 @@ add_website() {
     DB_USER=$(openssl rand -base64 8 | tr -d '/+=' | head -c 10)
     DB_PASS=$(openssl rand -base64 16 | tr -d '/+=' | head -c 16)
 
-    mysql -uroot -p"$DB_ROOT_PASS" -e "
+    _mysql -e "
     CREATE DATABASE \`${DB_NAME}\`;
     CREATE USER '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';
     GRANT ALL ON \`${DB_NAME}\`.* TO '${DB_USER}'@'localhost';
@@ -352,7 +364,7 @@ remove_website() {
     mkdir -p "$BACKUP_DIR"
     cp -r /home/$DEL_DOMAIN "$BACKUP_DIR/"
     DB=$(grep "^$DEL_DOMAIN:" /root/.vps-config/db-credentials.txt 2>/dev/null | grep -oP 'DB=\K\S+')
-    [ -n "$DB" ] && mysqldump -uroot -p"$DB_ROOT_PASS" "$DB" 2>/dev/null > "$BACKUP_DIR/${DEL_DOMAIN}.sql"
+    [ -n "$DB" ] && _mysqldump "$DB" 2>/dev/null > "$BACKUP_DIR/${DEL_DOMAIN}.sql"
 
     rm -f /etc/nginx/conf.d/${DEL_DOMAIN}.conf
     nginx -t && nginx -s reload
@@ -452,23 +464,23 @@ menu_database() {
     read -p "  Select: " DB_CHOICE
 
     case $DB_CHOICE in
-        1) mysql -uroot -p"$DB_ROOT_PASS" -e "SHOW DATABASES" 2>/dev/null; pause ;;
+        1) _mysql -e "SHOW DATABASES" 2>/dev/null; pause ;;
         2) read -p "  DB name: " NDB; read -p "  DB user: " NDBU; read -p "  DB pass: " NDBP
            validate_dbname "$NDB" || break; validate_dbname "$NDBU" || break
-           mysql -uroot -p"$DB_ROOT_PASS" -e "CREATE DATABASE \`$NDB\`; CREATE USER '$NDBU'@'localhost' IDENTIFIED BY '$NDBP'; GRANT ALL ON \`$NDB\`.* TO '$NDBU'@'localhost'; FLUSH PRIVILEGES;" 2>/dev/null
+           _mysql -e "CREATE DATABASE \`$NDB\`; CREATE USER '$NDBU'@'localhost' IDENTIFIED BY '$NDBP'; GRANT ALL ON \`$NDB\`.* TO '$NDBU'@'localhost'; FLUSH PRIVILEGES;" 2>/dev/null
            echo -e "${GREEN}  ✓ Database $NDB created${NC}"; pause ;;
         3) read -p "  DB name to delete: " DDB; validate_dbname "$DDB" || break
            read -p "  Confirm (y/N): " C
-           [ "$C" = "y" ] && mysql -uroot -p"$DB_ROOT_PASS" -e "DROP DATABASE \`$DDB\`" 2>/dev/null && echo -e "${GREEN}  ✓ Deleted${NC}"; pause ;;
+           [ "$C" = "y" ] && _mysql -e "DROP DATABASE \`$DDB\`" 2>/dev/null && echo -e "${GREEN}  ✓ Deleted${NC}"; pause ;;
         4) cat /root/.vps-config/db-credentials.txt 2>/dev/null; pause ;;
         5) bash /usr/local/bin/db_deep_optimize.sh; echo -e "${GREEN}  ✓ Optimized${NC}"; pause ;;
         6) read -p "  SQL file path: " SQL; read -p "  Target DB: " TDB
            validate_dbname "$TDB" || break
            [ ! -f "$SQL" ] && echo -e "${RED}  File not found${NC}" && break
-           mysql -uroot -p"$DB_ROOT_PASS" "$TDB" < "$SQL" 2>/dev/null && echo -e "${GREEN}  ✓ Imported${NC}"; pause ;;
+           _mysql "$TDB" < "$SQL" 2>/dev/null && echo -e "${GREEN}  ✓ Imported${NC}"; pause ;;
         7) read -p "  DB name: " EDB; validate_dbname "$EDB" || break
            read -p "  Output file: " EFILE
-           mysqldump -uroot -p"$DB_ROOT_PASS" "$EDB" 2>/dev/null > "$EFILE" && echo -e "${GREEN}  ✓ Exported to $EFILE${NC}"; pause ;;
+           _mysqldump "$EDB" 2>/dev/null > "$EFILE" && echo -e "${GREEN}  ✓ Exported to $EFILE${NC}"; pause ;;
     esac
 }
 
@@ -521,7 +533,7 @@ menu_backup() {
         3) read -p "  SQL.gz file: " RF; read -p "  Target DB: " RDB
            validate_dbname "$RDB" || break
            [ ! -f "$RF" ] && echo -e "${RED}  File not found${NC}" && break
-           gunzip -c "$RF" | mysql -uroot -p"$DB_ROOT_PASS" "$RDB" 2>/dev/null
+           gunzip -c "$RF" | _mysql "$RDB" 2>/dev/null
            echo -e "${GREEN}  ✓ Restored${NC}"; pause ;;
         4) [ -n "$BACKUP_VPS_IP" ] && rsync -azP /backup/ root@${BACKUP_VPS_IP}:/backup/from-${VPS_NAME}/ 2>/dev/null
            echo -e "${GREEN}  ✓ Synced${NC}"; pause ;;
@@ -728,7 +740,7 @@ cluster_migrate() {
     DB=$(grep "^$MIG_DOMAIN:" /root/.vps-config/db-credentials.txt 2>/dev/null | grep -oP 'DB=\K\S+')
     DB_USER_MIG=$(grep "^$MIG_DOMAIN:" /root/.vps-config/db-credentials.txt 2>/dev/null | grep -oP 'USER=\K\S+')
     DB_PASS_MIG=$(grep "^$MIG_DOMAIN:" /root/.vps-config/db-credentials.txt 2>/dev/null | grep -oP 'PASS=\K\S+')
-    mysqldump -uroot -p"$DB_ROOT_PASS" "$DB" 2>/dev/null | gzip > /tmp/migrate_${MIG_DOMAIN}.sql.gz
+    _mysqldump "$DB" 2>/dev/null | gzip > /tmp/migrate_${MIG_DOMAIN}.sql.gz
 
     # 2. Sync files
     rsync -azP /home/$MIG_DOMAIN/ root@$TGT_IP:/home/$MIG_DOMAIN/
@@ -990,9 +1002,9 @@ interactive_restore() {
 
     echo "  Restoring..."
     if [[ "$selected" == *.gz ]]; then
-        gunzip -c "$selected" | mysql -uroot -p"$DB_ROOT_PASS" "$db_name" 2>/dev/null
+        gunzip -c "$selected" | _mysql "$db_name" 2>/dev/null
     else
-        mysql -uroot -p"$DB_ROOT_PASS" "$db_name" < "$selected" 2>/dev/null
+        _mysql "$db_name" < "$selected" 2>/dev/null
     fi
 
     echo -e "  ${GREEN}✓ Database restored from $(basename $selected) → $db_name${NC}"
