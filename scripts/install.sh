@@ -237,19 +237,72 @@ run_audit() {
         echo -e "${GREEN}✅ All components installed!${NC}"
     fi
 
-    # Check WordPress sites
+    # Check WordPress sites — scan multiple known paths
     echo ""
     echo -e "${BOLD}🌐 WordPress Sites:${NC}"
     local sites_found=0
-    for dir in /var/www/*/; do
-        if [ -f "$dir/wp-config.php" ]; then
-            local domain=$(basename "$dir")
-            local wp_ver=$(grep "wp_version = " "$dir/wp-includes/version.php" 2>/dev/null | cut -d"'" -f2)
-            echo -e "   → ${CYAN}$domain${NC} (WP $wp_ver)"
-            ((sites_found++))
+    local wp_dirs=()
+    # Scan both /var/www and /home paths
+    for dir in /var/www/*/wp-config.php /home/*/public_html/wp-config.php /home/*/wp-config.php; do
+        [ -f "$dir" ] && wp_dirs+=("$(dirname "$dir")")
+    done
+    # Also check nginx configs for domains
+    if [ ${#wp_dirs[@]} -eq 0 ]; then
+        for conf in /etc/nginx/conf.d/*.conf /etc/nginx/sites-enabled/*; do
+            [ -f "$conf" ] || continue
+            local sn=$(grep -m1 'server_name' "$conf" 2>/dev/null | sed 's/server_name//;s/;//;s/www\.//g' | xargs | awk '{print $1}')
+            [ -z "$sn" ] || [[ "$sn" == "_" ]] || [[ "$sn" == "localhost" ]] && continue
+            for p in "/var/www/$sn" "/home/$sn/public_html" "/home/$sn"; do
+                [ -f "$p/wp-config.php" ] && wp_dirs+=("$p") && break
+            done
+        done
+    fi
+    
+    for dir in "${wp_dirs[@]}"; do
+        local domain=$(basename "$dir")
+        [ "$domain" = "public_html" ] && domain=$(basename "$(dirname "$dir")")
+        local wp_ver=$(grep "wp_version = " "$dir/wp-includes/version.php" 2>/dev/null | cut -d"'" -f2)
+        [ -z "$wp_ver" ] && wp_ver="?"
+        # SSL status
+        local ssl_icon="⚠"
+        [ -f "/etc/letsencrypt/live/$domain/fullchain.pem" ] && ssl_icon="${GREEN}🔒${NC}"
+        # DB name from wp-config
+        local db_name=$(grep "DB_NAME" "$dir/wp-config.php" 2>/dev/null | head -1 | cut -d"'" -f4)
+        [ -z "$db_name" ] && db_name="?"
+        # Disk usage
+        local disk_size=$(du -sh "$dir" 2>/dev/null | awk '{print $1}')
+        [ -z "$disk_size" ] && disk_size="?"
+        echo -e "   $ssl_icon ${CYAN}$domain${NC}  |  WP $wp_ver  |  DB: $db_name  |  ${disk_size}"
+        ((sites_found++))
+    done
+    
+    if [ $sites_found -eq 0 ]; then
+        echo -e "   ${YELLOW}(none found)${NC}"
+        echo -e "   ${WHITE}💡 To add your first site: vps-admin → 1. Website Management → a. Add${NC}"
+    fi
+    
+    # Quick VPS summary
+    echo ""
+    echo -e "${BOLD}📊 VPS Quick Stats:${NC}"
+    local _ram_info=$(free -h | awk '/Mem/{printf "%s/%s (%s used)", $3, $2, int($3/$2*100)"%"}')
+    local _disk_info=$(df -h / | awk 'NR==2{printf "%s/%s (%s used)", $3, $2, $5}')
+    local _cpu_cores=$(nproc 2>/dev/null || echo "?")
+    local _load=$(cat /proc/loadavg 2>/dev/null | awk '{print $1}')
+    local _uptime=$(uptime -p 2>/dev/null | sed 's/up //')
+    echo -e "   💾 RAM: $_ram_info"
+    echo -e "   💿 Disk: $_disk_info"
+    echo -e "   🔧 CPU: ${_cpu_cores} cores  |  Load: ${_load}  |  ⏱ Up: ${_uptime}"
+    
+    # Services status
+    echo ""
+    echo -e "${BOLD}🔄 Services:${NC}"
+    for svc in nginx php-fpm php8.1-fpm mariadb mysql redis-server redis fail2ban; do
+        if systemctl is-active "$svc" &>/dev/null; then
+            echo -e "   ${GREEN}●${NC} $svc"
+        elif systemctl list-unit-files "$svc.service" &>/dev/null 2>&1; then
+            echo -e "   ${RED}○${NC} $svc (stopped)"
         fi
     done
-    [ $sites_found -eq 0 ] && echo "   (none found)"
 
     echo ""
 
