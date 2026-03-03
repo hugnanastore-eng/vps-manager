@@ -20,7 +20,7 @@ _mysqldump() { mysqldump $_mysql_auth --single-transaction "$@" 2>/dev/null; }
 
 # Auto-detect SERVER_IP if not set in config
 if [ -z "$SERVER_IP" ]; then
-    SERVER_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
+    SERVER_IP=$(hostname -I 2>/dev/null | tr ' ' '\n' | grep -v '^127\.' | grep -v '^$' | head -1)
     [ -z "$SERVER_IP" ] && SERVER_IP=$(ip -4 addr show scope global 2>/dev/null | grep -oP 'inet \K[\d.]+' | head -1)
     if [ -z "$SERVER_IP" ]; then
         _ip=$(curl -s --max-time 3 ifconfig.me 2>/dev/null)
@@ -222,20 +222,23 @@ menu_website() {
     echo -e "${WHITE}${BOLD}  WEBSITE MANAGEMENT${NC}"
     echo -e "${GREEN}  ─────────────────────────────────${NC}"
     
-    # List sites
-    IFS=',' read -ra DOMS <<< "$DOMAINS"
+    # List sites (use _load_domains for auto-detection fallback)
+    _load_domains
     echo -e "  ${YELLOW}Current sites:${NC}"
-    local i=1
-    for d in "${DOMS[@]}"; do
-        d=$(echo "$d" | xargs)
-        CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 "https://$d" 2>/dev/null)
-        if [ "$CODE" = "200" ] || [ "$CODE" = "301" ]; then
-            echo -e "    $i. ${GREEN}●${NC} $d (HTTP $CODE)"
-        else
-            echo -e "    $i. ${RED}●${NC} $d (HTTP $CODE)"
-        fi
-        ((i++))
-    done
+    if [ ${#_domain_list[@]} -eq 0 ]; then
+        echo -e "    ${RED}No sites found. Add a site or configure DOMAINS in setup.conf${NC}"
+    else
+        local i=1
+        for d in "${_domain_list[@]}"; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 3 "https://$d" 2>/dev/null)
+            if [ "$CODE" = "200" ] || [ "$CODE" = "301" ]; then
+                echo -e "    $i. ${GREEN}●${NC} $d (HTTP $CODE)"
+            else
+                echo -e "    $i. ${RED}●${NC} $d (HTTP $CODE)"
+            fi
+            ((i++))
+        done
+    fi
     echo ""
     echo -e "  ${CYAN}1.${NC} Add new website"
     echo -e "  ${CYAN}2.${NC} Remove website"
@@ -518,8 +521,8 @@ menu_ssl() {
            echo -e "${GREEN}  ✓ SSL installed for $SD${NC}"; pause ;;
         2) /root/.acme.sh/acme.sh --cron --force; echo -e "${GREEN}  ✓ All renewed${NC}"; pause ;;
         3) /root/.acme.sh/acme.sh --list; pause ;;
-        4) IFS=',' read -ra DOMS <<< "$DOMAINS"
-           for d in "${DOMS[@]}"; do d=$(echo "$d" | xargs)
+        4) _load_domains
+           for d in "${_domain_list[@]}"; do
                EXP=$(echo | openssl s_client -servername $d -connect $d:443 2>/dev/null | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
                echo "  $d: $EXP"
            done; pause ;;
@@ -607,8 +610,8 @@ menu_performance() {
     read -p "  Select: " PERF_CHOICE
 
     case $PERF_CHOICE in
-        1) IFS=',' read -ra DOMS <<< "$DOMAINS"
-           for d in "${DOMS[@]}"; do d=$(echo "$d" | xargs)
+        1) _load_domains
+           for d in "${_domain_list[@]}"; do
                TTFB=$(curl -s -o /dev/null -w "%{time_starttransfer}" --connect-timeout 10 "https://$d" 2>/dev/null)
                if (( $(echo "$TTFB < 0.5" | bc -l 2>/dev/null) )); then C="${GREEN}"; elif (( $(echo "$TTFB < 1.0" | bc -l 2>/dev/null) )); then C="${YELLOW}"; else C="${RED}"; fi
                echo -e "  $d: ${C}${TTFB}s${NC}"
@@ -833,8 +836,8 @@ menu_monitoring() {
     read -p "  Select: " MON_CHOICE
 
     case $MON_CHOICE in
-        1) IFS=',' read -ra DOMS <<< "$DOMAINS"
-           for d in "${DOMS[@]}"; do d=$(echo "$d" | xargs)
+        1) _load_domains
+           for d in "${_domain_list[@]}"; do
                CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 "https://$d" 2>/dev/null)
                TTFB=$(curl -s -o /dev/null -w "%{time_starttransfer}" --connect-timeout 5 "https://$d" 2>/dev/null)
                echo -e "  $d: HTTP $CODE | TTFB: ${TTFB}s"
@@ -845,8 +848,8 @@ menu_monitoring() {
         5) tail -30 /var/log/integrity.log 2>/dev/null; pause ;;
         6) bash /usr/local/bin/tg_alert.sh "[TEST] $VPS_NAME: Admin panel test alert" 2>/dev/null
            echo -e "${GREEN}  ✓ Test alert sent${NC}"; pause ;;
-        7) IFS=',' read -ra DOMS <<< "$DOMAINS"
-           for d in "${DOMS[@]}"; do d=$(echo "$d" | xargs)
+        7) _load_domains
+           for d in "${_domain_list[@]}"; do
                SIZE=$(du -sh /home/$d/ 2>/dev/null | awk '{print $1}')
                echo "  $d: $SIZE"
            done; pause ;;
