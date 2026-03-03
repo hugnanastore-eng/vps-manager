@@ -4,48 +4,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VPS Manager v2.0 | 一键VPS管理工具 WordPress & LEMP</title>
+    <title>VPS管理脚本 v2.1 | 一键安装WordPress VPS — 9大模块、分表数据库备份、自动更新</title>
     <meta name="description"
-        content="一站式VPS管理工具包。自动安装 Nginx、PHP 8、MariaDB、WordPress、SSL、WAF、备份、监控。11个管理菜单，39项安全验证。免费开源。">
+        content="VPS管理脚本v2.1 — 分表数据库备份支持数GB数据库、WordPress自动更新带回滚、SSH密钥管理器、域名健康仪表盘、暂存站点、访问分析。9个专业模块。100%免费开源。">
+    <meta name="keywords"
+        content="VPS管理脚本, WordPress VPS安装, nginx wordpress 自动安装, VPS管理面板, 服务器安全, 分表数据库备份, wordpress自动更新回滚, ssh密钥管理, 域名健康检查, wordpress暂存">
+    <meta name="author" content="QLTro.com">
+    <meta name="robots" content="index, follow">
+
+    <!-- Schema JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "VPS Admin Script",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Linux",
+        "softwareVersion": "2.1.0",
+        "downloadUrl": "https://github.com/hugnanastore-eng/vps-manager",
+        "url": "https://qltro.com/vps",
+        "description": "VPS管理脚本v2.1，9个专业模块：分表数据库备份、WordPress自动更新带回滚、SSH密钥管理器、域名健康仪表盘、暂存站点、简易分析。支持Rocky Linux、AlmaLinux、Ubuntu。",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "QLTro.com",
+            "url": "https://qltro.com"
+        }
+    }
+    </script>
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
-    <style>
-        :root {
-            --bg: #0a0e17;
-            --surface: #111827;
-            --surface2: #1e293b;
-            --primary: #06b6d4;
-            --primary-glow: #22d3ee;
-            --green: #10b981;
-            --yellow: #f59e0b;
-            --red: #ef4444;
-            --purple: #8b5cf6;
-            --text: #f1f5f9;
-            --text-muted: #94a3b8;
-            --border: #1e293b;
-        }
 
-        * {
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0e1a;
+            --bg-card: #111827;
+            --bg-card-hover: #1a2332;
+            --border: #1e293b;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.3);
+            --green: #10b981;
+            --purple: #8b5cf6;
+            --orange: #f59e0b;
+            --red: #ef4444;
+            --cyan: #06b6d4;
         }
 
         body {
-            font-family: 'Noto Sans SC', 'Inter', sans-serif;
+            font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
             color: var(--text);
-            line-height: 1.7;
+            line-height: 1.8;
             overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
         }
 
         .lang-bar {
@@ -53,7 +82,7 @@
             justify-content: center;
             gap: 12px;
             padding: 12px;
-            background: var(--surface);
+            background: var(--bg-card);
             border-bottom: 1px solid var(--border);
         }
 
@@ -67,366 +96,624 @@
         }
 
         .lang-bar a.active {
-            color: var(--primary);
-            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent);
+            background: rgba(59, 130, 246, 0.1);
         }
 
         .lang-bar a:hover {
-            color: var(--primary);
+            color: var(--accent);
         }
 
         .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 100px 0 60px;
+            padding: 2rem;
             position: relative;
+            overflow: hidden;
         }
 
         .hero::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
-            pointer-events: none;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+            animation: heroFloat 20s ease-in-out infinite;
         }
 
-        .badge {
+        @keyframes heroFloat {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(30px, -30px) rotate(1deg);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) rotate(-1deg);
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+        }
+
+        .hero-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             padding: 6px 16px;
-            background: rgba(6, 182, 212, 0.1);
-            border: 1px solid rgba(6, 182, 212, 0.2);
             border-radius: 100px;
-            font-size: 13px;
-            color: var(--primary);
-            margin-bottom: 24px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--accent);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            animation: fadeUp 0.8s ease-out;
         }
 
-        .badge .dot {
-            width: 6px;
-            height: 6px;
-            background: var(--green);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.3;
-            }
-        }
-
-        h1 {
-            font-size: clamp(36px, 5vw, 64px);
-            font-weight: 800;
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
             line-height: 1.2;
-            margin-bottom: 20px;
-        }
-
-        h1 span {
-            background: linear-gradient(135deg, var(--primary), var(--purple));
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #3b82f6 50%, #8b5cf6 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
+            animation: fadeUp 0.8s ease-out 0.1s both;
         }
 
         .hero p {
-            font-size: 18px;
+            font-size: 1.2rem;
             color: var(--text-muted);
-            max-width: 640px;
-            margin: 0 auto 32px;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 48px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-num {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--primary);
-            font-family: 'Inter', sans-serif;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .install-block {
             max-width: 700px;
-            margin: 0 auto 40px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
+            margin: 0 auto 2.5rem;
+            animation: fadeUp 0.8s ease-out 0.2s both;
         }
 
-        .install-header {
+        .hero-buttons {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 16px;
-            background: var(--surface2);
-        }
-
-        .install-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .install-code {
-            padding: 20px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 14px;
-            color: var(--green);
-            white-space: nowrap;
-            overflow-x: auto;
-        }
-
-        .install-code .comment {
-            color: var(--text-muted);
-        }
-
-        .section {
-            padding: 80px 0;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .section-sub {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 16px;
-            margin-bottom: 48px;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-            gap: 20px;
-        }
-
-        .feature-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 28px;
-            transition: all 0.3s;
-        }
-
-        .feature-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-4px);
-            box-shadow: 0 0 30px rgba(6, 182, 212, 0.1);
-        }
-
-        .feature-icon {
-            font-size: 28px;
-            margin-bottom: 16px;
-        }
-
-        .feature-card h3 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .feature-card p {
-            font-size: 14px;
-            color: var(--text-muted);
-            line-height: 1.7;
-        }
-
-        .feature-tag {
-            display: inline-block;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            background: rgba(6, 182, 212, 0.1);
-            color: var(--primary);
-            margin-top: 12px;
-            font-weight: 500;
-        }
-
-        .menu-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 24px;
-        }
-
-        .menu-table th,
-        .menu-table td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-            font-size: 14px;
-        }
-
-        .menu-table th {
-            color: var(--text-muted);
-            font-weight: 500;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .menu-table td:first-child {
-            color: var(--primary);
-            font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .compare-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .compare-table th,
-        .compare-table td {
-            padding: 12px 16px;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            font-size: 14px;
-        }
-
-        .compare-table th {
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .compare-table th:last-child {
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        .compare-table td:first-child {
-            text-align: left;
-            font-weight: 500;
-        }
-
-        .check {
-            color: var(--green);
-            font-size: 18px;
-        }
-
-        .cross {
-            color: var(--red);
-            font-size: 18px;
-        }
-
-        .cta {
-            text-align: center;
-            padding: 80px 0;
-        }
-
-        .cta h2 {
-            font-size: 28px;
-            margin-bottom: 16px;
-        }
-
-        .cta p {
-            color: var(--text-muted);
-            margin-bottom: 32px;
-            font-size: 16px;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp 0.8s ease-out 0.3s both;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 14px 32px;
-            border-radius: 8px;
+            padding: 14px 28px;
+            border-radius: 12px;
             font-weight: 600;
+            font-size: 1rem;
             text-decoration: none;
-            font-size: 16px;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
         }
 
         .btn-primary {
-            background: var(--primary);
-            color: var(--bg);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
         }
 
         .btn-primary:hover {
-            background: var(--primary-glow);
-            box-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5);
         }
 
-        .btn-secondary {
+        .btn-outline {
             background: transparent;
             color: var(--text);
             border: 1px solid var(--border);
-            margin-left: 12px;
         }
 
-        .btn-secondary:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+        .btn-outline:hover {
+            background: var(--bg-card);
+            border-color: var(--accent);
         }
 
-        .donate-btn {
-            background: #0070ba;
-            color: white;
+        .terminal-preview {
+            max-width: 700px;
+            margin: 3rem auto 0;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            animation: fadeUp 0.8s ease-out 0.4s both;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
-        .donate-btn:hover {
-            background: #005ea6;
-            box-shadow: 0 0 30px rgba(0, 112, 186, 0.3);
+        .terminal-header {
+            background: #1e293b;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red {
+            background: #ef4444;
+        }
+
+        .terminal-dot.yellow {
+            background: #f59e0b;
+        }
+
+        .terminal-dot.green {
+            background: #10b981;
+        }
+
+        .terminal-body {
+            background: #0d1117;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .terminal-body .comment {
+            color: #6b7280;
+        }
+
+        .terminal-body .cmd {
+            color: #10b981;
+        }
+
+        .terminal-body .prompt {
+            color: #3b82f6;
+        }
+
+        .terminal-body .output {
+            color: #94a3b8;
+        }
+
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .section h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-desc {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            max-width: 600px;
+            margin-bottom: 3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-4px);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-icon.blue {
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .feature-icon.green {
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        .feature-icon.purple {
+            background: rgba(139, 92, 246, 0.15);
+        }
+
+        .feature-icon.orange {
+            background: rgba(245, 158, 11, 0.15);
+        }
+
+        .feature-icon.cyan {
+            background: rgba(6, 182, 212, 0.15);
+        }
+
+        .feature-icon.red {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .feature-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .comparison-section {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 14px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .comparison-table th:nth-child(2) {
+            color: var(--text-muted);
+        }
+
+        .comparison-table th:nth-child(3) {
+            color: var(--accent);
+        }
+
+        .comparison-table td {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .comparison-table td:first-child {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .check {
+            color: var(--green);
+            font-weight: bold;
+        }
+
+        .cross {
+            color: var(--red);
+            opacity: 0.5;
+        }
+
+        .new-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .step {
+            position: relative;
+            padding: 2rem;
+            padding-top: 3rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -16px;
+            left: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #fff;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .step h3 {
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .step p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .step code {
+            display: block;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--green);
+            overflow-x: auto;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: var(--bg-card-hover);
+        }
+
+        .menu-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .menu-item h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .menu-item p {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        .cta {
+            text-align: center;
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .cta p {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            margin-bottom: 2rem;
+        }
+
+        .copy-box {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .copy-box span {
+            color: var(--green);
+        }
+
+        .copy-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #2563eb;
+        }
+
+        .copy-btn.copied {
+            background: var(--green);
         }
 
         footer {
             text-align: center;
-            padding: 40px 0;
+            padding: 3rem 2rem;
             border-top: 1px solid var(--border);
             color: var(--text-muted);
-            font-size: 13px;
+            font-size: 0.85rem;
         }
 
-        .screenshot {
-            max-width: 700px;
-            margin: 0 auto;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid var(--border);
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
         }
 
-        .screenshot img {
-            width: 100%;
-            display: block;
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         @media (max-width: 768px) {
-            .stats {
-                gap: 24px;
+            .hero h1 {
+                font-size: 2rem;
             }
 
-            .features-grid {
-                grid-template-columns: 1fr;
+            .section h2 {
+                font-size: 1.8rem;
+            }
+
+            .section {
+                padding: 4rem 1.5rem;
+            }
+
+            .comparison-section {
+                padding: 1.5rem;
+                overflow-x: auto;
+            }
+
+            .comparison-table {
+                min-width: 500px;
+            }
+
+            .copy-box {
+                flex-direction: column;
+                gap: 12px;
             }
         }
     </style>
@@ -440,274 +727,654 @@
         <a href="index-zh.html" class="active">🇨🇳 中文</a>
     </div>
 
+    <!-- Hero -->
     <section class="hero">
-        <div class="container">
-            <div class="badge"><span class="dot"></span> 开源 · v2.0.0</div>
-            <h1>您的VPS，<br><span>全面管理</span></h1>
-            <p>一站式工具包，用于安装、保护和管理 WordPress VPS 服务器。一条命令完成安装，11个菜单管理一切。</p>
-            <div class="stats">
-                <div class="stat">
-                    <div class="stat-num">11</div>
-                    <div class="stat-label">管理菜单</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num">39</div>
-                    <div class="stat-label">安全检查</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num">5 分钟</div>
-                    <div class="stat-label">完成安装</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num">100%</div>
-                    <div class="stat-label">免费</div>
-                </div>
-            </div>
-            <div class="install-block">
-                <div class="install-header">
-                    <div class="install-dot" style="background:#ef4444"></div>
-                    <div class="install-dot" style="background:#f59e0b"></div>
-                    <div class="install-dot" style="background:#10b981"></div>
-                </div>
-                <div class="install-code">
-                    <span class="comment"># 在新VPS上安装</span><br>
-                    curl -sO https://raw.githubusercontent.com/hugnanastore-eng/vps-manager/main/scripts/install.sh &&
-                    bash install.sh
-                </div>
-            </div>
-            <a href="https://github.com/hugnanastore-eng/vps-manager" class="btn btn-primary">⭐ 在 GitHub 上查看</a>
-            <a href="#features" class="btn btn-secondary">了解更多 ↓</a>
-        </div>
-    </section>
+        <div class="hero-content">
+            <div class="hero-badge">🚀 v2.1 — 9大模块 · 免费开源</div>
+            <h1>一键VPS管理脚本</h1>
+            <p>分表数据库备份支持数GB大型数据库（含SHA256校验），WordPress自动更新带回滚，SSH密钥管理器，域名健康仪表盘，暂存站点，访问分析 —
+                <strong>9个专业模块</strong>。从裸VPS到生产环境仅需<strong>5分钟</strong>。已实测<strong>44MB数据库（583MB解压，119张表）</strong>。</p>
 
-    <section class="section" id="features">
-        <div class="container">
-            <h2 class="section-title">您所需的一切</h2>
-            <p class="section-sub">从安装到日常管理 — 一个工具包搞定</p>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🌐</div>
-                    <h3>网站管理</h3>
-                    <p>添加/删除 WordPress 站点，管理重定向，修复权限，切换维护模式，管理插件 — 全部在一个菜单中完成。</p>
-                    <span class="feature-tag">菜单 #1</span>
+            <div class="hero-buttons">
+                <a href="#install" class="btn btn-primary">⬇️ 立即安装</a>
+                <a href="#features" class="btn btn-outline">📋 查看功能</a>
+            </div>
+
+            <div class="terminal-preview">
+                <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span style="color:#94a3b8;font-size:0.8rem;margin-left:8px;">root@vps ~</span>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>安全 & WAF</h3>
-                    <p>12步恶意软件扫描器，7步防火墙加固，IP 封禁/解封，文件完整性检查，WordPress 批量安全审计。</p>
-                    <span class="feature-tag">菜单 #5</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔐</div>
-                    <h3>SSL 证书</h3>
-                    <p>自动签发 Let's Encrypt SSL，续签所有证书，检查到期日期。域名选择器使操作更便捷。</p>
-                    <span class="feature-tag">菜单 #3</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💾</div>
-                    <h3>备份与恢复</h3>
-                    <p>每日自动备份，Google Drive 同步，任意网站和数据库的时间点恢复。</p>
-                    <span class="feature-tag">菜单 #4</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>性能与速度</h3>
-                    <p>Redis/Memcached 切换，PHP OPcache，Nginx FastCGI 缓存，Gzip/Brotli 压缩 — 让您的站点飞速运行。</p>
-                    <span class="feature-tag">菜单 #6</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🌍</div>
-                    <h3>多IP管理</h3>
-                    <p>将特定IP分配给特定网站。查看 IP→域名 绑定关系。非常适合多站点、多品牌托管。</p>
-                    <span class="feature-tag">菜单 #11 · 新功能</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔗</div>
-                    <h3>VPS 集群同步</h3>
-                    <p>多VPS备份同步，跨服务器迁移，集群节点管理，实现高可用部署。</p>
-                    <span class="feature-tag">菜单 #7</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>监控与日志</h3>
-                    <p>实时健康检查，TTFB 监控，调试日志，磁盘使用跟踪，Telegram 警报通知。</p>
-                    <span class="feature-tag">菜单 #8</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🛡️</div>
-                    <h3>39项输入验证</h3>
-                    <p>每个用户输入在使用前都经过验证。域名、IP、数据库和插件名称都经过清理，防止注入攻击。</p>
-                    <span class="feature-tag">安全</span>
+                <div class="terminal-body">
+                    <span class="prompt">$</span> <span class="cmd">curl -sL https://qltro.com/vps/scripts/install.sh |
+                        bash</span><br>
+                    <span class="output">Enter domains: </span><span class="cmd">shop1.com,shop2.com</span><br>
+                    <span class="output">[SETUP] Detected: Rocky Linux 9</span><br>
+                    <span class="output">[SETUP] Installing Nginx + PHP 8.1 + MariaDB...</span><br>
+                    <span class="output">[SETUP] Creating shop1.com (DB: shop1_a3f2b1)</span><br>
+                    <span class="output">[SETUP] Creating shop2.com (DB: shop2_c8e4d7)</span><br>
+                    <span class="output">[SETUP] SSL installed for shop1.com ✓</span><br>
+                    <span class="output">[SETUP] WAF + Security headers configured ✓</span><br>
+                    <span class="output">[SETUP] Backup + Monitoring + Admin panel ✓</span><br><br>
+                    <span class="cmd">✅ SETUP COMPLETE!</span><br>
+                    <span class="output">Admin panel: </span><span class="cmd">vps-admin</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="section" style="background: var(--surface)">
-        <div class="container">
-            <h2 class="section-title">11个管理菜单</h2>
-            <p class="section-sub">全面的服务器管理，触手可及</p>
-            <div class="screenshot">
-                <img src="screenshots/main-menu.png" alt="VPS Manager 主菜单">
+    <!-- Features -->
+    <section class="section scroll-reveal" id="features">
+        <span class="section-label">功能</span>
+        <h2>一个脚本，全部搞定</h2>
+        <p class="section-desc">无需逐个安装，无需手动配置。脚本一键处理所有事务。</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon blue">🌐</div>
+                <h3>多站点WordPress</h3>
+                <p>在单个VPS上创建无限量网站。自动安装WordPress，创建数据库，配置Nginx，SSL — 只需输入域名。</p>
             </div>
-            <table class="menu-table" style="margin-top: 40px;">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>菜单</th>
-                        <th>说明</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>网站管理</td>
-                        <td>添加/删除站点、重定向、权限、插件</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>数据库管理</td>
-                        <td>创建、删除、导入、导出 MySQL 数据库</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>SSL 证书</td>
-                        <td>Let's Encrypt 自动签发、续签、到期检查</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>备份与恢复</td>
-                        <td>每日备份、Google Drive、时间点恢复</td>
-                    </tr>
-                    <tr>
-                        <td>5</td>
-                        <td>安全 & WAF</td>
-                        <td>恶意软件扫描、防火墙、IP封禁、完整性检查</td>
-                    </tr>
-                    <tr>
-                        <td>6</td>
-                        <td>性能与速度</td>
-                        <td>Redis、OPcache、FastCGI、Gzip/Brotli</td>
-                    </tr>
-                    <tr>
-                        <td>7</td>
-                        <td>VPS 集群同步</td>
-                        <td>多VPS同步、迁移、集群管理</td>
-                    </tr>
-                    <tr>
-                        <td>8</td>
-                        <td>监控与日志</td>
-                        <td>健康检查、TTFB、调试日志、Telegram 警报</td>
-                    </tr>
-                    <tr>
-                        <td>9</td>
-                        <td>系统设置</td>
-                        <td>PHP 版本、Nginx 配置、SSH、Swap</td>
-                    </tr>
-                    <tr>
-                        <td>10</td>
-                        <td>快捷工具</td>
-                        <td>常用管理快捷方式和实用工具</td>
-                    </tr>
-                    <tr>
-                        <td>11</td>
-                        <td>多IP管理</td>
-                        <td>IP→域名绑定、多IP网站</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="feature-card">
+                <div class="feature-icon green">🗄️</div>
+                <h3>分表数据库备份 <span class="new-badge">新</span></h3>
+                <p><strong>逐表单独导出MySQL</strong>，适合大型数据库。SHA256校验，失败自动重试3次。实测：<strong>119张表，44MB（解压583MB）</strong> —
+                    导出4秒，恢复26秒，100%准确。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon purple">🔄</div>
+                <h3>WP自动更新 + 回滚 <span class="new-badge">新</span></h3>
+                <p>更新前完整备份。批量更新核心、插件、主题。更新后验证HTTP状态 — 网站出错<strong>自动回滚</strong>。结果通过Telegram通知。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon cyan">📟</div>
+                <h3>资源告警 + Telegram <span class="new-badge">新</span></h3>
+                <p>自定义阈值监控RAM、磁盘、CPU、Swap。超限时<strong>Telegram自动告警</strong>，30分钟冷却防刷屏。一键配置cron。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon orange">🧹</div>
+                <h3>智能磁盘清理 <span class="new-badge">新</span></h3>
+                <p><strong>先预览</strong>再清理。删除旧日志、journal、包缓存、WP修订版本、临时数据、垃圾评论。精确显示回收空间。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon red">🔑</div>
+                <h3>SSH密钥管理器 <span class="new-badge">新</span></h3>
+                <p>添加/删除SSH密钥，验证格式（RSA、Ed25519）。<strong>防锁定</strong>：无密钥时不允许关闭密码登录。sshd_config备份 + 验证失败自动回滚。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon green">🩺</div>
+                <h3>域名健康仪表盘 <span class="new-badge">新</span></h3>
+                <p>一条命令显示<strong>完整仪表盘</strong>：HTTP状态、SSL到期、TTFB、数据库大小、磁盘使用 — 覆盖VPS上所有站点。颜色标记一目了然。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon purple">🚧</div>
+                <h3>WordPress暂存站点 <span class="new-badge">新</span></h3>
+                <p>克隆WordPress到<strong>staging.domain.com</strong>（文件+数据库）。自动替换数据库中的域名。.htpasswd密码保护。正则验证安全删除。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon cyan">📊</div>
+                <h3>简易访问分析 <span class="new-badge">新</span></h3>
+                <p>分析nginx访问日志：<strong>热门页面、IP、带宽、机器人vs人类、404错误、HTTP状态码</strong>。无需Google Analytics或第三方工具。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon green">🛡️</div>
+                <h3>WAF与安全</h3>
+                <p>Web应用防火墙（WAF）拦截SQL注入、XSS、路径遍历。结合fail2ban + 安全头 + 文件完整性监控。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon orange">🔄</div>
+                <h3>自动备份</h3>
+                <p>每日自动备份数据库+配置。跨VPS同步实现冗余。PHP文件恶意软件扫描。保留7天自动清理。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon red">🔗</div>
+                <h3>VPS集群同步</h3>
+                <p>将多台VPS组成集群。同步备份、配置，在VPS节点间迁移站点。从任意节点进行集群健康检查。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon red">🔍</div>
+                <h3>12步恶意软件扫描</h3>
+                <p>扫描WPCode代码段、后门、隐藏文件、shell注入、上传目录恶意软件、wp-config篡改、cron注入、伪管理员账户 — 自动移除威胁。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon orange">🔥</div>
+                <h3>防火墙加固</h3>
+                <p>内核级SYN洪水防护，UFW/firewalld自动配置，fail2ban 5个监控规则，SSH加固，Nginx DDoS防护，自动更新OS，修改root密码。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon purple">🌐</div>
+                <h3>多IP管理</h3>
+                <p>VPS有多个IP？通过nginx listen指令为每个网站分配独立IP。查看所有IP，绑定/解绑，验证连接。自动备份+回滚。</p>
+            </div>
         </div>
     </section>
 
-    <section class="section">
-        <div class="container">
-            <h2 class="section-title">为什么选择 VPS Manager？</h2>
-            <p class="section-sub">与手动配置和其他脚本的对比</p>
-            <table class="compare-table">
+    <!-- Comparison -->
+    <section class="section scroll-reveal">
+        <span class="section-label">对比</span>
+        <h2>超越HocVPS脚本</h2>
+        <p class="section-desc">继承HocVPS"一键"理念，扩展现代安全与自动化功能。</p>
+
+        <div class="comparison-section">
+            <table class="comparison-table">
                 <thead>
                     <tr>
                         <th>功能</th>
-                        <th>手动</th>
-                        <th>其他工具</th>
-                        <th>VPS Manager</th>
+                        <th>HocVPS脚本</th>
+                        <th>VPS一键 ⭐</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>一键安装</td>
-                        <td class="cross">✕</td>
-                        <td class="check">✓</td>
-                        <td class="check">✓</td>
+                        <td>添加/删除网站</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> + 自动WordPress</td>
                     </tr>
                     <tr>
-                        <td>智能检测（已有环境）</td>
-                        <td class="cross">✕</td>
-                        <td class="cross">✕</td>
-                        <td class="check">✓</td>
+                        <td>数据库管理</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> + 导入/导出SQL</td>
                     </tr>
                     <tr>
-                        <td>管理菜单</td>
-                        <td class="cross">0</td>
-                        <td>3-5</td>
-                        <td><strong style="color:var(--primary)">11</strong></td>
+                        <td>SSL Let's Encrypt</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> + 到期检查</td>
                     </tr>
                     <tr>
-                        <td>输入验证</td>
-                        <td class="cross">✕</td>
-                        <td class="cross">✕</td>
-                        <td><strong style="color:var(--green)">39项检查</strong></td>
+                        <td>备份/恢复</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> + 跨VPS + 分表备份</td>
+                    </tr>
+                    <tr>
+                        <td>SSH管理菜单</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> 11个菜单，9大模块</td>
+                    </tr>
+                    <tr>
+                        <td>分表数据库备份（数GB）</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> SHA256 + 重试 <span class="new-badge">v2.1</span></td>
+                    </tr>
+                    <tr>
+                        <td>WP自动更新 + 回滚</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> 备份→更新→验证→回滚 <span class="new-badge">v2.1</span></td>
+                    </tr>
+                    <tr>
+                        <td>资源告警Telegram</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> RAM/磁盘/CPU/Swap + 冷却 <span class="new-badge">v2.1</span></td>
+                    </tr>
+                    <tr>
+                        <td>磁盘清理 + 预览</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> 日志、修订、临时数据 <span class="new-badge">v2.1</span></td>
+                    </tr>
+                    <tr>
+                        <td>SSH密钥管理器</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> CRUD + 防锁定 <span class="new-badge">v2.1</span></td>
+                    </tr>
+                    <tr>
+                        <td>域名健康仪表盘</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> HTTP, SSL, TTFB, DB, 磁盘 <span class="new-badge">v2.1</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>WordPress暂存</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> 克隆 + .htpasswd <span class="new-badge">v2.1</span></td>
+                    </tr>
+                    <tr>
+                        <td>简易分析（无需工具）</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> 热门页面、IP、机器人、404 <span class="new-badge">v2.1</span></td>
+                    </tr>
+                    <tr>
+                        <td>WAF Web应用防火墙</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>文件完整性监控</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>VPS集群同步</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> VPS间迁移站点</td>
                     </tr>
                     <tr>
                         <td>多IP绑定</td>
-                        <td class="cross">✕</td>
-                        <td class="cross">✕</td>
-                        <td class="check">✓</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> 为每个站点分配IP</td>
                     </tr>
                     <tr>
-                        <td>域名选择器</td>
-                        <td class="cross">✕</td>
-                        <td class="cross">✕</td>
-                        <td class="check">✓</td>
-                    </tr>
-                    <tr>
-                        <td>模块化架构</td>
-                        <td class="cross">✕</td>
-                        <td class="cross">✕</td>
-                        <td class="check">✓</td>
-                    </tr>
-                    <tr>
-                        <td>恶意软件扫描</td>
-                        <td class="cross">✕</td>
-                        <td>基础</td>
-                        <td><strong style="color:var(--green)">12步</strong></td>
-                    </tr>
-                    <tr>
-                        <td>集群同步</td>
-                        <td class="cross">✕</td>
-                        <td class="cross">✕</td>
-                        <td class="check">✓</td>
+                        <td>输入验证安全</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> 39项验证防注入</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </section>
 
-    <section class="cta">
-        <div class="container">
-            <h2>☕ 支持这个项目</h2>
-            <p>如果这个工具帮您节省了时间，请考虑请我喝杯咖啡！</p>
-            <a href="https://paypal.me/HoangDuong" class="btn donate-btn" target="_blank">☕ 通过 PayPal 请我喝咖啡</a>
-            <br><br>
-            <a href="https://github.com/hugnanastore-eng/vps-manager" class="btn btn-primary" target="_blank">⭐ 在 GitHub
-                上给个 Star</a>
+    <!-- Admin Menu -->
+    <section class="section scroll-reveal" id="admin">
+        <span class="section-label">管理</span>
+        <h2>11个专业管理菜单</h2>
+        <p class="section-desc">在SSH中输入 <code
+                style="background:#1e293b;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace">vps-admin</code>
+            打开彩色交互菜单。</p>
+
+        <div class="menu-grid">
+            <div class="menu-item"><span class="menu-num">1</span>
+                <div>
+                    <h4>🌐 网站</h4>
+                    <p>添加/删除站点、域名重定向、权限、维护模式、插件管理</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">2</span>
+                <div>
+                    <h4>🗄️ 数据库</h4>
+                    <p>创建/删除数据库、查看凭据、优化、导入/导出SQL文件</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">3</span>
+                <div>
+                    <h4>🔒 SSL</h4>
+                    <p>签发Let's Encrypt SSL、续签全部、检查到期日期</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">4</span>
+                <div>
+                    <h4>💾 备份 <span class="new-badge">+分表</span></h4>
+                    <p>立即备份、恢复、集群同步、<strong>分表导出</strong>适合数GB大型数据库</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">5</span>
+                <div>
+                    <h4>🛡️ 安全</h4>
+                    <p>WAF统计、完整性检查、fail2ban、IP封禁/解封、查看攻击</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">6</span>
+                <div>
+                    <h4>⚡ 性能</h4>
+                    <p>TTFB速度测试、PHP-FPM状态、OPcache、重启服务</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">7</span>
+                <div>
+                    <h4>🔗 集群</h4>
+                    <p>添加/删除VPS节点、同步配置与备份、迁移站点、健康检查</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">8</span>
+                <div>
+                    <h4>📊 监控 <span class="new-badge">+健康 +分析</span></h4>
+                    <p>站点状态、日志、<strong>域名健康仪表盘</strong>、<strong>简易分析</strong>（热门页面、IP、机器人）</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">9</span>
+                <div>
+                    <h4>⚙️ 系统</h4>
+                    <p>系统信息、更新OS、重启服务、Telegram/cron配置</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">10</span>
+                <div>
+                    <h4>⚡ 快捷工具 <span class="new-badge">+5新</span></h4>
+                    <p><strong>WP自动更新</strong>、<strong>SSH密钥管理</strong>、<strong>WP暂存</strong>、磁盘清理预览、资源告警Telegram、Swap
+                    </p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">11</span>
+                <div>
+                    <h4>🌐 多IP</h4>
+                    <p>查看所有IP、为站点分配IP、解除绑定、验证各IP连接</p>
+                </div>
+            </div>
         </div>
     </section>
 
-    <footer>
-        <div class="container">
-            <p>VPS Manager v2.0.0 · MIT 许可证 · 为VPS社区用 ❤️ 制作</p>
+    <!-- Install -->
+    <section class="section scroll-reveal" id="install">
+        <span class="section-label">安装</span>
+        <h2>2步 — 5分钟</h2>
+        <p class="section-desc">只需1台VPS（Rocky Linux 8/9 或 Ubuntu 22.04+）2GB内存。无需下载。</p>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>运行安装命令</h3>
+                <p>SSH登录VPS，执行一条命令。脚本自动检测并安装。</p><code>curl -sL https://qltro.com/api/vps-download | bash</code>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>指向DNS并使用</h3>
+                <p>将域名指向VPS IP（推荐使用Cloudflare）。访问域名安装WordPress。</p><code>vps-admin  # 打开管理菜单</code>
+            </div>
         </div>
+    </section>
+
+    <!-- Cron -->
+    <section class="section scroll-reveal">
+        <span class="section-label">自动化</span>
+        <h2>全天候无需管理</h2>
+        <p class="section-desc">安装完成后一切自动运行。您只需查看Telegram通知。</p>
+
+        <div class="comparison-section">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>时间</th>
+                        <th>脚本</th>
+                        <th>功能</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>每5分钟</td>
+                        <td>site_monitor.sh</td>
+                        <td>检查在线状态 → 宕机时Telegram告警</td>
+                    </tr>
+                    <tr>
+                        <td>每天2:00 AM</td>
+                        <td>backup_full.sh</td>
+                        <td>备份数据库+配置 + 跨VPS同步</td>
+                    </tr>
+                    <tr>
+                        <td>每天6:00 AM</td>
+                        <td>integrity_check.sh</td>
+                        <td>检测被修改文件、上传目录中的恶意软件</td>
+                    </tr>
+                    <tr>
+                        <td>周日3:30 AM</td>
+                        <td>db_deep_optimize.sh</td>
+                        <td>清理修订、垃圾、临时数据、优化表</td>
+                    </tr>
+                    <tr>
+                        <td>周日5:00 AM</td>
+                        <td>wp_auto_update.sh</td>
+                        <td>更新插件/主题 + 出错自动回滚</td>
+                    </tr>
+                    <tr>
+                        <td>周一8:00 AM</td>
+                        <td>broken_link_check.sh</td>
+                        <td>检查站点地图中的失效链接</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Smart Update -->
+    <section class="section scroll-reveal" id="smart-update">
+        <span class="section-label">智能</span>
+        <h2>智能安装与自动更新</h2>
+        <p class="section-desc">无需全新VPS。脚本自动识别现有环境，仅安装缺失部分 — 与任何控制面板并行运行。</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon green">🔍</div>
+                <h3>系统审计</h3>
+                <p>扫描全部15个组件：Nginx、PHP、MariaDB、Redis、fail2ban、SSL、WP-CLI、WAF、备份、监控… 显示带版本号的详细状态表。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon blue">🧠</div>
+                <h3>智能检测</h3>
+                <p>自动识别已安装面板：HocVPS、aaPanel、CyberPanel、HestiaCP、CloudPanel、CWP。已有则跳过，缺什么装什么 — 不动现有配置。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon purple">⬆️</div>
+                <h3>一键更新</h3>
+                <p>运行 <code
+                        style="background:#1e293b;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update update</code>
+                    升级。比较版本，下载新脚本，安装缺失组件 — 更新前自动备份。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon cyan">🔗</div>
+                <h3>100%兼容</h3>
+                <p>与HocVPS、aaPanel、CyberPanel并行运行无冲突。只添加功能，不修改现有结构。独立管理面板。</p>
+            </div>
+        </div>
+
+        <div class="comparison-section" style="margin-top:2rem">
+            <h3 style="font-size:1.2rem;margin-bottom:1.5rem">📋 6种运行模式</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>命令</th>
+                        <th>描述</th>
+                        <th>使用场景</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code
+                                style="color:#10b981;font-family:'JetBrains Mono',monospace;font-size:0.85rem">curl ... | bash</code>
+                        </td>
+                        <td>自动检测模式</td>
+                        <td>自动识别全新或已有VPS，选择合适模式</td>
+                    </tr>
+                    <tr>
+                        <td><code
+                                style="color:#10b981;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update smart</code>
+                        </td>
+                        <td>智能安装</td>
+                        <td>VPS已运行 — 仅安装缺失部分</td>
+                    </tr>
+                    <tr>
+                        <td><code
+                                style="color:#10b981;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update update</code>
+                        </td>
+                        <td>更新</td>
+                        <td>脚本已安装 — 升级至新版本</td>
+                    </tr>
+                    <tr>
+                        <td><code
+                                style="color:#10b981;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update audit</code>
+                        </td>
+                        <td>系统审计</td>
+                        <td>仅扫描显示状态，不安装任何内容</td>
+                    </tr>
+                    <tr>
+                        <td><code
+                                style="color:#ef4444;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update malware-scan</code>
+                        </td>
+                        <td>🛡️ 恶意软件扫描</td>
+                        <td>扫描WPCode、主题、上传、wp-config、cron — 自动清除</td>
+                    </tr>
+                    <tr>
+                        <td><code>vps-update firewall</code></td>
+                        <td>&#x1F525; 防火墙加固</td>
+                        <td>防火墙 + fail2ban + SSH加固 + DDoS防护 + 内核调优</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Compatibility -->
+    <section class="section scroll-reveal" id="compatibility">
+        <span class="section-label">兼容性</span>
+        <h2>与一切并行运行</h2>
+        <p class="section-desc">与传统脚本不同，VPS一键不会"接管"系统。在现有环境上安装，不影响已有配置。</p>
+
+        <div class="menu-grid">
+            <div class="menu-item"><span class="menu-num">✓</span>
+                <div>
+                    <h4>HocVPS脚本</h4>
+                    <p>保留HocVPS菜单，添加WAF、监控、跨VPS备份、扩展管理面板</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">✓</span>
+                <div>
+                    <h4>aaPanel / 宝塔面板</h4>
+                    <p>添加WAF规则、Telegram告警、文件完整性 — 不影响Web面板界面</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">✓</span>
+                <div>
+                    <h4>CyberPanel / OpenLiteSpeed</h4>
+                    <p>添加备份自动化、安全头、监控cron — 兼容OLS</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">✓</span>
+                <div>
+                    <h4>HestiaCP / CloudPanel</h4>
+                    <p>添加CLI管理、WAF、Telegram机器人 — Web面板正常运行</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">✓</span>
+                <div>
+                    <h4>手动LEMP环境</h4>
+                    <p>自建Nginx+PHP+MariaDB？脚本检测已有环境，仅添加WAF+备份+管理</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">✓</span>
+                <div>
+                    <h4>全新VPS</h4>
+                    <p>什么都没装？完整安装模式 — 5分钟部署全套环境</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta scroll-reveal" id="download">
+        <div class="cta-content">
+            <h2>立即开始 — 免费</h2>
+            <p>在VPS上运行一条命令即可安装全部内容</p>
+
+            <div class="copy-box">
+                <span id="copy-text">curl -sL https://qltro.com/api/vps-download | bash</span>
+                <button class="copy-btn" onclick="copyCmd()">📋 复制</button>
+            </div>
+
+            <p style="margin-top:1rem;color:var(--text-muted);font-size:0.85rem">⚠️ 防滥用：每个IP每分钟限1次请求</p>
+
+            <div
+                style="margin-top:2.5rem;text-align:left;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.5rem">
+                <h3 style="font-size:1.1rem;margin-bottom:1rem">🔍 查看源代码</h3>
+                <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem">不放心？运行前可查看全部源码。100%开源，无混淆。</p>
+                <div style="display:flex;flex-direction:column;gap:0.75rem">
+                    <div
+                        style="display:flex;align-items:center;gap:0.75rem;background:#0f172a;padding:0.75rem 1rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem">
+                        <span style="color:#64748b">📄</span>
+                        <a href="https://github.com/hugnanastore-eng/vps-manager/blob/main/scripts/install.sh"
+                            target="_blank" style="color:#38bdf8;text-decoration:none">install.sh</a>
+                        <span style="color:#64748b;font-size:0.8rem">— 智能安装器 + 恶意软件扫描（主脚本）</span>
+                    </div>
+                    <div
+                        style="display:flex;align-items:center;gap:0.75rem;background:#0f172a;padding:0.75rem 1rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem">
+                        <span style="color:#64748b">📄</span>
+                        <a href="https://github.com/hugnanastore-eng/vps-manager/blob/main/scripts/vps-setup.sh"
+                            target="_blank" style="color:#38bdf8;text-decoration:none">vps-setup.sh</a>
+                        <span style="color:#64748b;font-size:0.8rem">— VPS配置（Nginx, PHP, MariaDB, SSL...）</span>
+                    </div>
+                    <div
+                        style="display:flex;align-items:center;gap:0.75rem;background:#0f172a;padding:0.75rem 1rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem">
+                        <span style="color:#64748b">📄</span>
+                        <a href="https://github.com/hugnanastore-eng/vps-manager/blob/main/scripts/vps-admin.sh"
+                            target="_blank" style="color:#38bdf8;text-decoration:none">vps-admin.sh</a>
+                        <span style="color:#64748b;font-size:0.8rem">— 管理面板（11个菜单、监控、备份）</span>
+                    </div>
+                    <div
+                        style="display:flex;align-items:center;gap:0.75rem;background:#0f172a;padding:0.75rem 1rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem">
+                        <span style="color:#64748b">📁</span>
+                        <a href="https://github.com/hugnanastore-eng/vps-manager/tree/main/scripts/modules"
+                            target="_blank" style="color:#38bdf8;text-decoration:none">modules/</a>
+                        <span style="color:#64748b;font-size:0.8rem">— 9大模块：分表备份、WP自动更新、SSH密钥、域名健康、暂存、分析…</span>
+                    </div>
+                </div>
+                <p style="color:#64748b;font-size:0.8rem;margin-top:1rem">💡 提示：运行 <code
+                        style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#10b981">curl -sL https://qltro.com/api/vps-download</code>（不加
+                    <code
+                        style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#f59e0b">| bash</code>）先预览脚本内容。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section scroll-reveal" id="faq">
+        <span class="section-label">常见问题</span>
+        <h2>常见问题解答</h2>
+
+        <div style="max-width:700px">
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">脚本安全吗？</summary>
+                <p style="color:var(--text-muted);margin-top:1rem">安全。全部源码开放，运行前可检查。脚本不会向外发送数据，除了Telegram告警（如果您配置了的话）。
+                </p>
+            </details>
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">支持哪些操作系统？</summary>
+                <p style="color:var(--text-muted);margin-top:1rem">Rocky Linux 8/9（推荐）、AlmaLinux 8/9、Ubuntu 22.04、Ubuntu
+                    24.04。VPS至少需要2GB内存和10GB磁盘空间。</p>
+            </details>
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">与HocVPS脚本有什么不同？</summary>
+                <p style="color:var(--text-muted);margin-top:1rem">
+                    VPS一键v2.1优于HocVPS，拥有9大模块：分表数据库备份、WordPress自动更新带回滚、SSH密钥管理器、域名健康仪表盘、暂存站点、访问分析、资源告警Telegram。HocVPS脚本不具备这些功能。
+                </p>
+            </details>
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">需要Linux专业知识吗？</summary>
+                <p style="color:var(--text-muted);margin-top:1rem">不需要深入专业知识。只需会SSH登录VPS即可。管理菜单完全交互式，标注清晰 — 选择数字即可操作。
+                </p>
+            </details>
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">能从HocVPS迁移吗？</summary>
+                <p style="color:var(--text-muted);margin-top:1rem">
+                    可以。只需备份旧VPS数据（数据库+wp-content），在新VPS上安装脚本，然后导入。脚本在数据库菜单中内置SQL导入功能。</p>
+            </details>
+        </div>
+    </section>
+
+    <!-- FAQ Schema JSON-LD -->
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        { "@type": "Question", "name": "VPS管理脚本安全吗？", "acceptedAnswer": { "@type": "Answer", "text": "安全。全部源码开放，运行前可检查。脚本不会向外发送数据。" } },
+        { "@type": "Question", "name": "支持哪些操作系统？", "acceptedAnswer": { "@type": "Answer", "text": "Rocky Linux 8/9、AlmaLinux 8/9、Ubuntu 22.04、Ubuntu 24.04。VPS至少需要2GB内存。" } },
+        { "@type": "Question", "name": "与HocVPS有什么不同？", "acceptedAnswer": { "@type": "Answer", "text": "VPS一键v2.1拥有9大模块：分表数据库备份、WordPress自动更新带回滚、SSH密钥管理器、域名健康仪表盘、暂存站点、访问分析、资源告警Telegram。" } }
+    ]
+}
+</script>
+
+    <footer>
+        <p>由 <a href="https://qltro.com">QLTro.com</a> 用 ❤️ 制作 &mdash; VPS管理脚本 v2.1</p>
+        <p style="margin-top:8px">支持：Rocky Linux、AlmaLinux、Ubuntu &bull; Nginx &bull; PHP 8 &bull; MariaDB &bull;
+            WordPress &bull; WooCommerce</p>
     </footer>
+
+    <script>
+        function copyCmd() {
+            const text = document.getElementById('copy-text').textContent;
+            navigator.clipboard.writeText(text);
+            const btn = document.querySelector('.copy-btn');
+            btn.textContent = '✓ 已复制!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = '📋 复制'; btn.classList.remove('copied'); }, 2000);
+        }
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+    </script>
 
 </body>
 

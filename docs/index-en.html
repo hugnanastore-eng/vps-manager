@@ -4,57 +4,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VPS Manager v2.0 | One-Command VPS Setup for WordPress & LEMP</title>
+    <title>VPS Admin Script v2.1 | One-Command WordPress VPS Management — 9 Modules, Per-Table DB Backup, Auto-Update
+    </title>
     <meta name="description"
-        content="All-in-one VPS management toolkit. Auto-install Nginx, PHP 8, MariaDB, WordPress, SSL, WAF, backup, monitoring. 11 admin menus, 39 security validations. Free & open source.">
+        content="VPS management script v2.1 — per-table DB backup for multi-GB databases, WordPress auto-update with rollback, SSH key manager, domain health dashboard, staging, analytics. 9 specialized modules. 100% free & open source.">
+    <meta name="keywords"
+        content="vps management script, wordpress vps setup, nginx wordpress auto install, vps admin panel, server security, per-table database backup, wordpress auto update rollback, ssh key manager, domain health check, wordpress staging, vps monitoring telegram">
+    <meta name="author" content="QLTro.com">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="VPS Admin Script v2.1 | Per-Table DB Backup, WP Auto-Update, 9 Modules">
+    <meta property="og:description"
+        content="VPS management script v2.1 — per-table DB backup with SHA256 checksum, WordPress auto-update with rollback, SSH key manager, domain health dashboard, staging. 9 specialized modules. Free & open source.">
+    <meta property="og:url" content="https://qltro.com/vps">
+    <meta property="og:site_name" content="QLTro.com">
+
+    <!-- Schema JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "VPS Admin Script",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Linux",
+        "softwareVersion": "2.1.0",
+        "downloadUrl": "https://github.com/hugnanastore-eng/vps-manager",
+        "url": "https://qltro.com/vps",
+        "description": "VPS management script v2.1 with 9 specialized modules: per-table DB backup for multi-GB databases, WordPress auto-update with rollback, SSH key manager, domain health dashboard, WP staging, simple analytics. Supports Rocky Linux, AlmaLinux, Ubuntu.",
+        "featureList": "Per-Table DB Backup, WordPress Auto-Update + Rollback, Resource Alert Telegram, Disk Cleanup, SSH Key Manager, Domain Health Dashboard, WP Staging, Simple Analytics, Multi-IP Management",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "QLTro.com",
+            "url": "https://qltro.com"
+        }
+    }
+    </script>
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
         rel="stylesheet">
-    <style>
-        :root {
-            --bg: #0a0e17;
-            --surface: #111827;
-            --surface2: #1e293b;
-            --primary: #06b6d4;
-            --primary-glow: #22d3ee;
-            --green: #10b981;
-            --yellow: #f59e0b;
-            --red: #ef4444;
-            --purple: #8b5cf6;
-            --text: #f1f5f9;
-            --text-muted: #94a3b8;
-            --border: #1e293b;
-        }
 
-        * {
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0e1a;
+            --bg-card: #111827;
+            --bg-card-hover: #1a2332;
+            --border: #1e293b;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.3);
+            --green: #10b981;
+            --green-glow: rgba(16, 185, 129, 0.2);
+            --purple: #8b5cf6;
+            --orange: #f59e0b;
+            --red: #ef4444;
+            --cyan: #06b6d4;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
             color: var(--text);
-            line-height: 1.6;
+            line-height: 1.7;
             overflow-x: hidden;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        /* Language Switcher */
+        /* Language Bar */
         .lang-bar {
             display: flex;
             justify-content: center;
             gap: 12px;
             padding: 12px;
-            background: var(--surface);
+            background: var(--bg-card);
             border-bottom: 1px solid var(--border);
         }
 
@@ -68,377 +108,635 @@
         }
 
         .lang-bar a.active {
-            color: var(--primary);
-            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent);
+            background: rgba(59, 130, 246, 0.1);
         }
 
         .lang-bar a:hover {
-            color: var(--primary);
+            color: var(--accent);
         }
 
         /* Hero */
         .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 100px 0 60px;
+            padding: 2rem;
             position: relative;
+            overflow: hidden;
         }
 
         .hero::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
-            pointer-events: none;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+            animation: heroFloat 20s ease-in-out infinite;
         }
 
-        .badge {
+        @keyframes heroFloat {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(30px, -30px) rotate(1deg);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) rotate(-1deg);
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+        }
+
+        .hero-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             padding: 6px 16px;
-            background: rgba(6, 182, 212, 0.1);
-            border: 1px solid rgba(6, 182, 212, 0.2);
             border-radius: 100px;
-            font-size: 13px;
-            color: var(--primary);
-            margin-bottom: 24px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--accent);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            animation: fadeUp 0.8s ease-out;
         }
 
-        .badge .dot {
-            width: 6px;
-            height: 6px;
-            background: var(--green);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.3;
-            }
-        }
-
-        h1 {
-            font-size: clamp(36px, 5vw, 64px);
-            font-weight: 800;
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
             line-height: 1.1;
-            margin-bottom: 20px;
-        }
-
-        h1 span {
-            background: linear-gradient(135deg, var(--primary), var(--purple));
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #3b82f6 50%, #8b5cf6 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
+            animation: fadeUp 0.8s ease-out 0.1s both;
         }
 
         .hero p {
-            font-size: 18px;
+            font-size: 1.25rem;
             color: var(--text-muted);
-            max-width: 640px;
-            margin: 0 auto 32px;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 48px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-num {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        /* Install */
-        .install-block {
             max-width: 700px;
-            margin: 0 auto 40px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
+            margin: 0 auto 2.5rem;
+            animation: fadeUp 0.8s ease-out 0.2s both;
         }
 
-        .install-header {
+        .hero-buttons {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 16px;
-            background: var(--surface2);
-        }
-
-        .install-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .install-code {
-            padding: 20px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 14px;
-            color: var(--green);
-            white-space: nowrap;
-            overflow-x: auto;
-        }
-
-        .install-code .comment {
-            color: var(--text-muted);
-        }
-
-        /* Features */
-        .section {
-            padding: 80px 0;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .section-sub {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 16px;
-            margin-bottom: 48px;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-            gap: 20px;
-        }
-
-        .feature-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 28px;
-            transition: all 0.3s;
-        }
-
-        .feature-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-4px);
-            box-shadow: 0 0 30px rgba(6, 182, 212, 0.1);
-        }
-
-        .feature-icon {
-            font-size: 28px;
-            margin-bottom: 16px;
-        }
-
-        .feature-card h3 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .feature-card p {
-            font-size: 14px;
-            color: var(--text-muted);
-            line-height: 1.6;
-        }
-
-        .feature-tag {
-            display: inline-block;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            background: rgba(6, 182, 212, 0.1);
-            color: var(--primary);
-            margin-top: 12px;
-            font-weight: 500;
-        }
-
-        /* Menu Table */
-        .menu-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 24px;
-        }
-
-        .menu-table th,
-        .menu-table td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-            font-size: 14px;
-        }
-
-        .menu-table th {
-            color: var(--text-muted);
-            font-weight: 500;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .menu-table td:first-child {
-            color: var(--primary);
-            font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .menu-table tr:hover {
-            background: rgba(6, 182, 212, 0.03);
-        }
-
-        /* Comparison */
-        .compare-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .compare-table th,
-        .compare-table td {
-            padding: 12px 16px;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            font-size: 14px;
-        }
-
-        .compare-table th {
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .compare-table th:last-child {
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        .compare-table td:first-child {
-            text-align: left;
-            font-weight: 500;
-        }
-
-        .check {
-            color: var(--green);
-            font-size: 18px;
-        }
-
-        .cross {
-            color: var(--red);
-            font-size: 18px;
-        }
-
-        /* CTA / Donate */
-        .cta {
-            text-align: center;
-            padding: 80px 0;
-        }
-
-        .cta h2 {
-            font-size: 28px;
-            margin-bottom: 16px;
-        }
-
-        .cta p {
-            color: var(--text-muted);
-            margin-bottom: 32px;
-            font-size: 16px;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp 0.8s ease-out 0.3s both;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 14px 32px;
-            border-radius: 8px;
+            padding: 14px 28px;
+            border-radius: 12px;
             font-weight: 600;
+            font-size: 1rem;
             text-decoration: none;
-            font-size: 16px;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
         }
 
         .btn-primary {
-            background: var(--primary);
-            color: var(--bg);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
         }
 
         .btn-primary:hover {
-            background: var(--primary-glow);
-            box-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5);
         }
 
-        .btn-secondary {
+        .btn-outline {
             background: transparent;
             color: var(--text);
             border: 1px solid var(--border);
-            margin-left: 12px;
         }
 
-        .btn-secondary:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+        .btn-outline:hover {
+            background: var(--bg-card);
+            border-color: var(--accent);
         }
 
-        .donate-btn {
-            background: #0070ba;
-            color: white;
+        /* Terminal Preview */
+        .terminal-preview {
+            max-width: 700px;
+            margin: 3rem auto 0;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            animation: fadeUp 0.8s ease-out 0.4s both;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
-        .donate-btn:hover {
-            background: #005ea6;
-            box-shadow: 0 0 30px rgba(0, 112, 186, 0.3);
+        .terminal-header {
+            background: #1e293b;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red {
+            background: #ef4444;
+        }
+
+        .terminal-dot.yellow {
+            background: #f59e0b;
+        }
+
+        .terminal-dot.green {
+            background: #10b981;
+        }
+
+        .terminal-body {
+            background: #0d1117;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .terminal-body .comment {
+            color: #6b7280;
+        }
+
+        .terminal-body .cmd {
+            color: #10b981;
+        }
+
+        .terminal-body .prompt {
+            color: #3b82f6;
+        }
+
+        .terminal-body .output {
+            color: #94a3b8;
+        }
+
+        /* Sections */
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .section h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-desc {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            max-width: 600px;
+            margin-bottom: 3rem;
+        }
+
+        /* Feature Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-4px);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-icon.blue {
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .feature-icon.green {
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        .feature-icon.purple {
+            background: rgba(139, 92, 246, 0.15);
+        }
+
+        .feature-icon.orange {
+            background: rgba(245, 158, 11, 0.15);
+        }
+
+        .feature-icon.cyan {
+            background: rgba(6, 182, 212, 0.15);
+        }
+
+        .feature-icon.red {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .feature-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Comparison Table */
+        .comparison-section {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 14px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .comparison-table th:nth-child(2) {
+            color: var(--text-muted);
+        }
+
+        .comparison-table th:nth-child(3) {
+            color: var(--accent);
+        }
+
+        .comparison-table td {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .comparison-table td:first-child {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .check {
+            color: var(--green);
+            font-weight: bold;
+        }
+
+        .cross {
+            color: var(--red);
+            opacity: 0.5;
+        }
+
+        .new-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+
+        /* Steps */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .step {
+            position: relative;
+            padding: 2rem;
+            padding-top: 3rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -16px;
+            left: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #fff;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .step h3 {
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .step p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .step code {
+            display: block;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--green);
+            overflow-x: auto;
+        }
+
+        /* Menu Grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: var(--bg-card-hover);
+        }
+
+        .menu-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .menu-item h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .menu-item p {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        /* CTA */
+        .cta {
+            text-align: center;
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .cta p {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            margin-bottom: 2rem;
+        }
+
+        .copy-box {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .copy-box span {
+            color: var(--green);
+        }
+
+        .copy-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #2563eb;
+        }
+
+        .copy-btn.copied {
+            background: var(--green);
         }
 
         /* Footer */
         footer {
             text-align: center;
-            padding: 40px 0;
+            padding: 3rem 2rem;
             border-top: 1px solid var(--border);
             color: var(--text-muted);
-            font-size: 13px;
+            font-size: 0.85rem;
         }
 
-        /* Screenshot */
-        .screenshot {
-            max-width: 700px;
-            margin: 0 auto;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid var(--border);
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
         }
 
-        .screenshot img {
-            width: 100%;
-            display: block;
-        }
-
-        @media (max-width: 768px) {
-            .stats {
-                gap: 24px;
+        /* Animations */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
 
-            .features-grid {
-                grid-template-columns: 1fr;
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .section h2 {
+                font-size: 1.8rem;
+            }
+
+            .section {
+                padding: 4rem 1.5rem;
+            }
+
+            .comparison-section {
+                padding: 1.5rem;
+                overflow-x: auto;
+            }
+
+            .comparison-table {
+                min-width: 500px;
+            }
+
+            .copy-box {
+                flex-direction: column;
+                gap: 12px;
             }
         }
     </style>
@@ -452,284 +750,735 @@
         <a href="index-zh.html">🇨🇳 中文</a>
     </div>
 
+    <!-- Hero -->
     <section class="hero">
-        <div class="container">
-            <div class="badge"><span class="dot"></span> Open Source · v2.0.0</div>
-            <h1>Your VPS,<br><span>Fully Managed</span></h1>
-            <p>All-in-one toolkit to install, secure, and manage WordPress VPS servers. One command to set up, 11 menus
-                to manage everything.</p>
-            <div class="stats">
-                <div class="stat">
-                    <div class="stat-num">11</div>
-                    <div class="stat-label">Admin Menus</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num">39</div>
-                    <div class="stat-label">Security Checks</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num">5 min</div>
-                    <div class="stat-label">Full Setup</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num">100%</div>
-                    <div class="stat-label">Free</div>
-                </div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                🚀 v2.1 — 9 Modules · Free & Open Source
             </div>
-            <div class="install-block">
-                <div class="install-header">
-                    <div class="install-dot" style="background:#ef4444"></div>
-                    <div class="install-dot" style="background:#f59e0b"></div>
-                    <div class="install-dot" style="background:#10b981"></div>
-                </div>
-                <div class="install-code">
-                    <span class="comment"># Install on a fresh VPS</span><br>
-                    curl -sO https://raw.githubusercontent.com/hugnanastore-eng/vps-manager/main/scripts/install.sh &&
-                    bash install.sh
-                </div>
-            </div>
-            <a href="https://github.com/hugnanastore-eng/vps-manager" class="btn btn-primary">⭐ View on GitHub</a>
-            <a href="#features" class="btn btn-secondary">Learn More ↓</a>
-        </div>
-    </section>
+            <h1>One-Command VPS Admin Script</h1>
+            <p>Per-table DB backup for multi-GB databases with SHA256 checksum, WordPress auto-update with rollback, SSH
+                key manager, domain health dashboard, WP staging, analytics — <strong>9 specialized modules</strong>.
+                From bare VPS to production in <strong>5 minutes</strong>. Battle-tested with <strong>44MB DB (583MB
+                    uncompressed, 119 tables)</strong>.</p>
 
-    <section class="section" id="features">
-        <div class="container">
-            <h2 class="section-title">Everything You Need</h2>
-            <p class="section-sub">From installation to daily management — one toolkit handles it all</p>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🌐</div>
-                    <h3>Website Management</h3>
-                    <p>Add/remove WordPress sites, manage redirects, fix permissions, toggle maintenance mode, manage
-                        plugins — all from a single menu.</p>
-                    <span class="feature-tag">Menu #1</span>
+            <div class="hero-buttons">
+                <a href="#install" class="btn btn-primary">
+                    ⬇️ Install Now
+                </a>
+                <a href="#features" class="btn btn-outline">
+                    📋 View Features
+                </a>
+            </div>
+
+            <div class="terminal-preview">
+                <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span style="color:#94a3b8;font-size:0.8rem;margin-left:8px;">root@vps ~</span>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Security & WAF</h3>
-                    <p>12-step malware scanner, 7-step firewall hardening, IP ban/unban, file integrity checks,
-                        WordPress bulk security audit.</p>
-                    <span class="feature-tag">Menu #5</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔐</div>
-                    <h3>SSL Certificates</h3>
-                    <p>Auto-issue Let's Encrypt SSL, renew all certificates, check expiry dates. Domain picker makes
-                        selection instant.</p>
-                    <span class="feature-tag">Menu #3</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💾</div>
-                    <h3>Backup & Restore</h3>
-                    <p>Daily automated backups, Google Drive sync, point-in-time restore for any website and database.
-                    </p>
-                    <span class="feature-tag">Menu #4</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Performance & Speed</h3>
-                    <p>Redis/Memcached toggle, PHP OPcache, Nginx FastCGI cache, Gzip/Brotli compression — make your
-                        sites fly.</p>
-                    <span class="feature-tag">Menu #6</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🌍</div>
-                    <h3>Multi-IP Management</h3>
-                    <p>Assign specific IPs to specific websites. View IP→domain bindings. Perfect for multi-site,
-                        multi-brand hosting.</p>
-                    <span class="feature-tag">Menu #11 · NEW</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔗</div>
-                    <h3>VPS Cluster Sync</h3>
-                    <p>Multi-VPS backup sync, cross-server migration, cluster node management for high-availability
-                        setups.</p>
-                    <span class="feature-tag">Menu #7</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>Monitoring & Logs</h3>
-                    <p>Real-time health checks, TTFB monitoring, debug logs, disk usage tracking, Telegram alerts.</p>
-                    <span class="feature-tag">Menu #8</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🛡️</div>
-                    <h3>39 Input Validations</h3>
-                    <p>Every user input validated before use. Domain, IP, database, and plugin names are all sanitized
-                        to prevent injection attacks.</p>
-                    <span class="feature-tag">Security</span>
+                <div class="terminal-body">
+                    <span class="prompt">$</span> <span class="cmd">curl -sL https://qltro.com/vps/scripts/install.sh |
+                        bash</span><br>
+                    <span class="output">Enter domains: </span><span class="cmd">shop1.com,shop2.com</span><br>
+                    <span class="output">[SETUP] Detected: Rocky Linux 9</span><br>
+                    <span class="output">[SETUP] Installing Nginx + PHP 8.1 + MariaDB...</span><br>
+                    <span class="output">[SETUP] Creating shop1.com (DB: shop1_a3f2b1)</span><br>
+                    <span class="output">[SETUP] Creating shop2.com (DB: shop2_c8e4d7)</span><br>
+                    <span class="output">[SETUP] SSL installed for shop1.com ✓</span><br>
+                    <span class="output">[SETUP] WAF + Security headers configured ✓</span><br>
+                    <span class="output">[SETUP] Backup + Monitoring + Admin panel ✓</span><br><br>
+                    <span class="cmd">✅ SETUP COMPLETE!</span><br>
+                    <span class="output">Admin panel: </span><span class="cmd">vps-admin</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="section" style="background: var(--surface)">
-        <div class="container">
-            <h2 class="section-title">11-Menu Admin Panel</h2>
-            <p class="section-sub">Comprehensive server management at your fingertips</p>
-            <div class="screenshot">
-                <img src="screenshots/main-menu.png" alt="VPS Manager Main Menu">
+    <!-- Features -->
+    <section class="section scroll-reveal" id="features">
+        <span class="section-label">Features</span>
+        <h2>All-in-One Script</h2>
+        <p class="section-desc">No piecemeal installs, no manual configs. The script handles everything.</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon blue">🌐</div>
+                <h3>Multi-site WordPress</h3>
+                <p>Create unlimited websites on a single VPS. Auto-installs WordPress, creates database, configures
+                    Nginx, SSL — just enter the domain name.</p>
             </div>
-            <table class="menu-table" style="margin-top: 40px;">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Menu</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Website Management</td>
-                        <td>Add/remove sites, redirects, permissions, plugins</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Database Management</td>
-                        <td>Create, delete, import, export MySQL databases</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>SSL Certificate</td>
-                        <td>Let's Encrypt auto-issue, renew, expiry check</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>Backup & Restore</td>
-                        <td>Daily backups, Google Drive, point-in-time restore</td>
-                    </tr>
-                    <tr>
-                        <td>5</td>
-                        <td>Security & WAF</td>
-                        <td>Malware scanner, firewall, IP ban, integrity check</td>
-                    </tr>
-                    <tr>
-                        <td>6</td>
-                        <td>Performance & Speed</td>
-                        <td>Redis, OPcache, FastCGI, Gzip/Brotli</td>
-                    </tr>
-                    <tr>
-                        <td>7</td>
-                        <td>VPS Cluster Sync</td>
-                        <td>Multi-VPS sync, migration, cluster management</td>
-                    </tr>
-                    <tr>
-                        <td>8</td>
-                        <td>Monitoring & Logs</td>
-                        <td>Health checks, TTFB, debug logs, Telegram alerts</td>
-                    </tr>
-                    <tr>
-                        <td>9</td>
-                        <td>System Settings</td>
-                        <td>PHP version, Nginx config, SSH, swap</td>
-                    </tr>
-                    <tr>
-                        <td>10</td>
-                        <td>Quick Tools</td>
-                        <td>Common admin shortcuts and utilities</td>
-                    </tr>
-                    <tr>
-                        <td>11</td>
-                        <td>Multi-IP Management</td>
-                        <td>IP→domain binding, multi-IP websites</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="feature-card">
+                <div class="feature-icon green">🗄️</div>
+                <h3>Per-Table DB Backup for Multi-GB <span class="new-badge">NEW</span></h3>
+                <p>Dumps <strong>each MySQL table individually</strong> for heavy databases. SHA256 checksum, 3 retries
+                    on failure. Battle-tested: <strong>119 tables, 44MB (583MB uncompressed)</strong> — dump 4s, restore
+                    26s, 100% accurate.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon purple">🔄</div>
+                <h3>WP Auto-Update + Rollback <span class="new-badge">NEW</span></h3>
+                <p>Full backup before updating. Updates core, plugins, themes for all sites. Verifies HTTP status
+                    post-update — <strong>auto-rollback</strong> if site errors. Results sent via Telegram.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon cyan">📟</div>
+                <h3>Resource Alert + Telegram <span class="new-badge">NEW</span></h3>
+                <p>Monitors RAM, Disk, CPU, Swap with custom thresholds. <strong>Telegram alerts</strong> automatically
+                    when limits exceeded, 30-minute cooldown to avoid spam. 1-click cron setup.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon orange">🧹</div>
+                <h3>Smart Disk Cleanup <span class="new-badge">NEW</span></h3>
+                <p><strong>Dry-run first</strong> to preview what will be cleaned. Removes old logs, journal, package
+                    cache, WP revisions, transients, spam comments. Shows exact space reclaimed.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon red">🔑</div>
+                <h3>SSH Key Manager <span class="new-badge">NEW</span></h3>
+                <p>Add/remove SSH keys, validate format (RSA, Ed25519). <strong>Lockout prevention</strong>: won't
+                    disable password if no key exists. sshd_config backup + auto-rollback on validation error.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon green">🩺</div>
+                <h3>Domain Health Dashboard <span class="new-badge">NEW</span></h3>
+                <p>Single command displays a <strong>full dashboard</strong>: HTTP status, SSL expiry, TTFB, database
+                    size, disk usage — for all sites on the VPS. Color-coded for clarity.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon purple">🚧</div>
+                <h3>WordPress Staging <span class="new-badge">NEW</span></h3>
+                <p>Clone WordPress to <strong>staging.domain.com</strong> (files + DB). Auto search-replace domain in
+                    DB. Protected by .htpasswd. Safe staging deletion with regex validation.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon cyan">📊</div>
+                <h3>Simple Analytics <span class="new-badge">NEW</span></h3>
+                <p>Analyze nginx access logs: <strong>top pages, IPs, bandwidth, bot vs human, 404 errors, HTTP status
+                        codes</strong>. No Google Analytics or external tools needed.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon green">🛡️</div>
+                <h3>WAF & Security</h3>
+                <p>Web Application Firewall (WAF) blocks SQL injection, XSS, path traversal. Combined with fail2ban +
+                    security headers + file integrity monitor.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon orange">🔄</div>
+                <h3>Automated Backup</h3>
+                <p>Daily database + config backups. Cross-VPS sync for redundancy. PHP file malware scanning. 7-day
+                    retention with auto-cleanup.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon red">🔗</div>
+                <h3>VPS Cluster Sync</h3>
+                <p>Link multiple VPS servers into a cluster. Sync backups, configs, migrate sites between VPS nodes.
+                    Cluster-wide health checks from any node.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon red">🔍</div>
+                <h3>12-Step Malware Scanner</h3>
+                <p>Scans WPCode snippets, backdoors, hidden files, shell injection, uploads malware, wp-config
+                    tampering, cron injection, fake admin users — auto-removes threats.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon orange">🔥</div>
+                <h3>Firewall Hardening</h3>
+                <p>Kernel tuning for SYN flood, UFW/firewalld auto-config, fail2ban with 5 jails, SSH hardening, Nginx
+                    DDoS protection, auto-update OS, change root password.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon purple">🌐</div>
+                <h3>Multi-IP Management</h3>
+                <p>Multiple IPs on your VPS? Assign specific IPs to specific websites via nginx listen directive. View
+                    all IPs, bind/unbind, verify. Auto-backup + rollback.</p>
+            </div>
         </div>
     </section>
 
-    <section class="section">
-        <div class="container">
-            <h2 class="section-title">Why VPS Manager?</h2>
-            <p class="section-sub">Compare with manual setup and other scripts</p>
-            <table class="compare-table">
+    <!-- Comparison -->
+    <section class="section scroll-reveal">
+        <span class="section-label">Comparison</span>
+        <h2>Superior to HocVPS Script</h2>
+        <p class="section-desc">Inherits the "one-touch" philosophy of HocVPS Script, extended with modern security &
+            automation features.</p>
+
+        <div class="comparison-section">
+            <table class="comparison-table">
                 <thead>
                     <tr>
                         <th>Feature</th>
-                        <th>Manual</th>
-                        <th>Others</th>
-                        <th>VPS Manager</th>
+                        <th>HocVPS Script</th>
+                        <th>VPS 1-Touch ⭐</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>One-command install</td>
-                        <td class="cross">✕</td>
-                        <td class="check">✓</td>
-                        <td class="check">✓</td>
+                        <td>Add/Remove websites</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> + auto WordPress</td>
                     </tr>
                     <tr>
-                        <td>Smart detection (existing setup)</td>
-                        <td class="cross">✕</td>
-                        <td class="cross">✕</td>
-                        <td class="check">✓</td>
+                        <td>Database management</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> + import/export SQL</td>
                     </tr>
                     <tr>
-                        <td>Admin menus</td>
-                        <td class="cross">0</td>
-                        <td>3-5</td>
-                        <td><strong style="color:var(--primary)">11</strong></td>
+                        <td>SSL Let's Encrypt</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> + expiry check</td>
                     </tr>
                     <tr>
-                        <td>Input validation</td>
-                        <td class="cross">✕</td>
-                        <td class="cross">✕</td>
-                        <td><strong style="color:var(--green)">39 checks</strong></td>
+                        <td>Backup/Restore</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> + cross-VPS + split per-table</td>
+                    </tr>
+                    <tr>
+                        <td>SSH admin menus</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span> 11 menus, 9 modules</td>
+                    </tr>
+                    <tr>
+                        <td>Per-table DB backup (multi-GB)</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> SHA256 + retry <span class="new-badge">v2.1</span></td>
+                    </tr>
+                    <tr>
+                        <td>WP Auto-Update + Rollback</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> Backup → update → verify → rollback <span
+                                class="new-badge">v2.1</span></td>
+                    </tr>
+                    <tr>
+                        <td>Resource Alert Telegram</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> RAM/Disk/CPU/Swap + cooldown <span
+                                class="new-badge">v2.1</span></td>
+                    </tr>
+                    <tr>
+                        <td>Disk Cleanup + Dry-run</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> Logs, revisions, transients <span class="new-badge">v2.1</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>SSH Key Manager</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> CRUD + lockout prevention <span class="new-badge">v2.1</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Domain Health Dashboard</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> HTTP, SSL, TTFB, DB, Disk <span class="new-badge">v2.1</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>WordPress Staging</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> Clone + .htpasswd <span class="new-badge">v2.1</span></td>
+                    </tr>
+                    <tr>
+                        <td>Simple Analytics (no tools)</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> Top pages, IPs, bots, 404s <span class="new-badge">v2.1</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>WAF (Web Application Firewall)</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>File Integrity Monitor</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>VPS Cluster Sync</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> Migrate sites between VPS</td>
                     </tr>
                     <tr>
                         <td>Multi-IP binding</td>
-                        <td class="cross">✕</td>
-                        <td class="cross">✕</td>
-                        <td class="check">✓</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> Assign IP per site</td>
                     </tr>
                     <tr>
-                        <td>Domain picker UX</td>
-                        <td class="cross">✕</td>
-                        <td class="cross">✕</td>
-                        <td class="check">✓</td>
-                    </tr>
-                    <tr>
-                        <td>Modular architecture</td>
-                        <td class="cross">✕</td>
-                        <td class="cross">✕</td>
-                        <td class="check">✓</td>
-                    </tr>
-                    <tr>
-                        <td>Malware scanner</td>
-                        <td class="cross">✕</td>
-                        <td>Basic</td>
-                        <td><strong style="color:var(--green)">12-step</strong></td>
-                    </tr>
-                    <tr>
-                        <td>Cluster sync</td>
-                        <td class="cross">✕</td>
-                        <td class="cross">✕</td>
-                        <td class="check">✓</td>
+                        <td>Input validation security</td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓</span> 39 validations anti-injection</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </section>
 
-    <section class="cta">
-        <div class="container">
-            <h2>☕ Support This Project</h2>
-            <p>If this tool saves you time, consider buying me a coffee!</p>
-            <a href="https://paypal.me/HoangDuong" class="btn donate-btn" target="_blank">☕ Buy Me a Coffee via
-                PayPal</a>
-            <br><br>
-            <a href="https://github.com/hugnanastore-eng/vps-manager" class="btn btn-primary" target="_blank">⭐ Star on
-                GitHub</a>
+    <!-- Admin Menu -->
+    <section class="section scroll-reveal" id="admin">
+        <span class="section-label">Admin</span>
+        <h2>11 Professional Admin Menus</h2>
+        <p class="section-desc">Type <code
+                style="background:#1e293b;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace">vps-admin</code>
+            in SSH to open the colorful interactive menu.</p>
+
+        <div class="menu-grid">
+            <div class="menu-item"><span class="menu-num">1</span>
+                <div>
+                    <h4>🌐 Website</h4>
+                    <p>Add/remove sites, domain redirect, permissions, maintenance mode, plugin management</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">2</span>
+                <div>
+                    <h4>🗄️ Database</h4>
+                    <p>Create/delete DB, view credentials, optimize, import/export SQL files</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">3</span>
+                <div>
+                    <h4>🔒 SSL</h4>
+                    <p>Issue Let's Encrypt SSL, renew all, check expiry dates</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">4</span>
+                <div>
+                    <h4>💾 Backup <span class="new-badge">+SPLIT</span></h4>
+                    <p>Backup now, restore, cluster sync, <strong>split dump per-table</strong> for multi-GB databases
+                    </p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">5</span>
+                <div>
+                    <h4>🛡️ Security</h4>
+                    <p>WAF stats, integrity check, fail2ban, ban/unban IP, view attacks</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">6</span>
+                <div>
+                    <h4>⚡ Performance</h4>
+                    <p>Speed test TTFB, PHP-FPM status, OPcache, restart services</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">7</span>
+                <div>
+                    <h4>🔗 Cluster</h4>
+                    <p>Add/remove VPS, sync config & backup, migrate sites, health check</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">8</span>
+                <div>
+                    <h4>📊 Monitoring <span class="new-badge">+HEALTH +ANALYTICS</span></h4>
+                    <p>Site status, logs, <strong>domain health dashboard</strong>, <strong>simple analytics</strong>
+                        (top pages, IPs, bots)</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">9</span>
+                <div>
+                    <h4>⚙️ System</h4>
+                    <p>System info, OS updates, restart services, Telegram/cron config</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">10</span>
+                <div>
+                    <h4>⚡ Quick Tools <span class="new-badge">+5 NEW</span></h4>
+                    <p><strong>WP auto-update</strong>, <strong>SSH key manager</strong>, <strong>WP staging</strong>,
+                        disk cleanup dry-run, resource alerts Telegram, swap</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">11</span>
+                <div>
+                    <h4>🌐 Multi-IP</h4>
+                    <p>View all IPs, assign IP to site, unbind, verify connections per IP</p>
+                </div>
+            </div>
         </div>
     </section>
 
-    <footer>
-        <div class="container">
-            <p>VPS Manager v2.0.0 · MIT License · Made with ❤️ for the VPS community</p>
+    <!-- Install Steps -->
+    <section class="section scroll-reveal" id="install">
+        <span class="section-label">Install</span>
+        <h2>2 Steps — 5 Minutes</h2>
+        <p class="section-desc">Just need 1 VPS (Rocky Linux 8/9 or Ubuntu 22.04+) with 2GB RAM. No downloads required.
+        </p>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Run the install command</h3>
+                <p>SSH into your VPS, run a single command. The script auto-detects and installs everything.</p>
+                <code>curl -sL https://qltro.com/api/vps-download | bash</code>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Point DNS & use</h3>
+                <p>Point your domain to VPS IP (Cloudflare recommended). Access the domain to install WordPress.</p>
+                <code>vps-admin  # Open admin menu</code>
+            </div>
         </div>
+    </section>
+
+    <!-- Cron Schedule -->
+    <section class="section scroll-reveal">
+        <span class="section-label">Automation</span>
+        <h2>Runs 24/7 Without Management</h2>
+        <p class="section-desc">After installation, everything runs automatically. You just check Telegram.</p>
+
+        <div class="comparison-section">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Schedule</th>
+                        <th>Script</th>
+                        <th>Function</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Every 5 minutes</td>
+                        <td>site_monitor.sh</td>
+                        <td>Check uptime → Telegram alert if down</td>
+                    </tr>
+                    <tr>
+                        <td>2:00 AM daily</td>
+                        <td>backup_full.sh</td>
+                        <td>Backup DB + configs + cross-VPS sync</td>
+                    </tr>
+                    <tr>
+                        <td>6:00 AM daily</td>
+                        <td>integrity_check.sh</td>
+                        <td>Detect modified files, malware in uploads</td>
+                    </tr>
+                    <tr>
+                        <td>3:30 AM Sunday</td>
+                        <td>db_deep_optimize.sh</td>
+                        <td>Clean revisions, spam, transients, optimize tables</td>
+                    </tr>
+                    <tr>
+                        <td>5:00 AM Sunday</td>
+                        <td>wp_auto_update.sh</td>
+                        <td>Update plugins/themes + auto rollback on error</td>
+                    </tr>
+                    <tr>
+                        <td>8:00 AM Monday</td>
+                        <td>broken_link_check.sh</td>
+                        <td>Check broken links in sitemap</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Smart Update -->
+    <section class="section scroll-reveal" id="smart-update">
+        <span class="section-label">Smart</span>
+        <h2>Smart Install &amp; Auto Update</h2>
+        <p class="section-desc">No bare VPS required. The script auto-detects your existing setup, only installs what's
+            missing — works alongside any control panel.</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon green">🔍</div>
+                <h3>System Audit</h3>
+                <p>Scans all 15 components: Nginx, PHP, MariaDB, Redis, fail2ban, SSL, WP-CLI, WAF, backup,
+                    monitoring... Displays detailed status table with versions.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon blue">🧠</div>
+                <h3>Smart Detection</h3>
+                <p>Auto-detects installed panels: HocVPS, aaPanel, CyberPanel, HestiaCP, CloudPanel, CWP. Already
+                    installed? SKIP. Missing? Install — no touching existing configs.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon purple">⬆️</div>
+                <h3>1-Click Update</h3>
+                <p>Run <code
+                        style="background:#1e293b;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update update</code>
+                    to upgrade. Compares versions, downloads new scripts, installs missing components — auto-backup
+                    before update.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon cyan">🔗</div>
+                <h3>100% Compatible</h3>
+                <p>Runs alongside HocVPS, aaPanel, CyberPanel without conflicts. Only adds features, never modifies
+                    existing structure. Separate admin panel.</p>
+            </div>
+        </div>
+
+        <div class="comparison-section" style="margin-top:2rem">
+            <h3 style="font-size:1.2rem;margin-bottom:1.5rem">📋 6 Operating Modes</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                        <th>When to Use</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code
+                                style="color:#10b981;font-family:'JetBrains Mono',monospace;font-size:0.85rem">curl ... | bash</code>
+                        </td>
+                        <td>Auto-detect mode</td>
+                        <td>Auto-detects bare vs existing VPS, picks the right mode</td>
+                    </tr>
+                    <tr>
+                        <td><code
+                                style="color:#10b981;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update smart</code>
+                        </td>
+                        <td>Smart Install</td>
+                        <td>VPS already running — only install missing parts</td>
+                    </tr>
+                    <tr>
+                        <td><code
+                                style="color:#10b981;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update update</code>
+                        </td>
+                        <td>Update</td>
+                        <td>Script already installed — upgrade to new version</td>
+                    </tr>
+                    <tr>
+                        <td><code
+                                style="color:#10b981;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update audit</code>
+                        </td>
+                        <td>System Audit</td>
+                        <td>Scan and display status only, no installation</td>
+                    </tr>
+                    <tr>
+                        <td><code
+                                style="color:#ef4444;font-family:'JetBrains Mono',monospace;font-size:0.85rem">vps-update malware-scan</code>
+                        </td>
+                        <td>🛡️ Malware Scanner</td>
+                        <td>Scan WPCode, themes, uploads, wp-config, cron — auto-remove malware</td>
+                    </tr>
+                    <tr>
+                        <td><code>vps-update firewall</code></td>
+                        <td>&#x1F525; Firewall Hardening</td>
+                        <td>Firewall + fail2ban + SSH hardening + DDoS protection + kernel tuning</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Compatibility -->
+    <section class="section scroll-reveal" id="compatibility">
+        <span class="section-label">Compatibility</span>
+        <h2>Works Alongside Everything</h2>
+        <p class="section-desc">Unlike traditional scripts, VPS 1-Touch doesn't "take over" the system. Install on top
+            without affecting your existing setup.</p>
+
+        <div class="menu-grid">
+            <div class="menu-item"><span class="menu-num">✓</span>
+                <div>
+                    <h4>HocVPS Script</h4>
+                    <p>Keeps HocVPS menus, adds WAF, monitoring, cross-VPS backup, extended admin panel</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">✓</span>
+                <div>
+                    <h4>aaPanel / BT Panel</h4>
+                    <p>Adds WAF rules, Telegram alerts, file integrity — doesn't touch web panel interface</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">✓</span>
+                <div>
+                    <h4>CyberPanel / OpenLiteSpeed</h4>
+                    <p>Adds backup automation, security headers, monitoring cron — OLS compatible</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">✓</span>
+                <div>
+                    <h4>HestiaCP / CloudPanel</h4>
+                    <p>Adds CLI admin, WAF, Telegram bot — web panel continues working normally</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">✓</span>
+                <div>
+                    <h4>Manual LEMP Setup</h4>
+                    <p>Custom Nginx + PHP + MariaDB? Script detects existing, only adds WAF + backup + admin</p>
+                </div>
+            </div>
+            <div class="menu-item"><span class="menu-num">✓</span>
+                <div>
+                    <h4>Bare VPS (Fresh)</h4>
+                    <p>Nothing installed? Full install mode — entire stack in 5 minutes</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta scroll-reveal" id="download">
+        <div class="cta-content">
+            <h2>Get Started Now — Free</h2>
+            <p>Run a single command on your VPS to install everything</p>
+
+            <div class="copy-box">
+                <span id="copy-text">curl -sL https://qltro.com/api/vps-download | bash</span>
+                <button class="copy-btn" onclick="copyCmd()">📋 Copy</button>
+            </div>
+
+            <p style="margin-top:1rem;color:var(--text-muted);font-size:0.85rem">⚠️ Anti-spam: limited to 1 request per
+                minute per IP</p>
+
+            <!-- Source Review -->
+            <div
+                style="margin-top:2.5rem;text-align:left;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.5rem">
+                <h3 style="font-size:1.1rem;margin-bottom:1rem">🔍 Review Source Code</h3>
+                <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem">Don't trust? Read the entire
+                    source before running. 100% open source, no obfuscation.</p>
+                <div style="display:flex;flex-direction:column;gap:0.75rem">
+                    <div
+                        style="display:flex;align-items:center;gap:0.75rem;background:#0f172a;padding:0.75rem 1rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem">
+                        <span style="color:#64748b">📄</span>
+                        <a href="https://github.com/hugnanastore-eng/vps-manager/blob/main/scripts/install.sh"
+                            target="_blank" style="color:#38bdf8;text-decoration:none">install.sh</a>
+                        <span style="color:#64748b;font-size:0.8rem">— Smart installer + malware scanner (main
+                            script)</span>
+                    </div>
+                    <div
+                        style="display:flex;align-items:center;gap:0.75rem;background:#0f172a;padding:0.75rem 1rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem">
+                        <span style="color:#64748b">📄</span>
+                        <a href="https://github.com/hugnanastore-eng/vps-manager/blob/main/scripts/vps-setup.sh"
+                            target="_blank" style="color:#38bdf8;text-decoration:none">vps-setup.sh</a>
+                        <span style="color:#64748b;font-size:0.8rem">— VPS setup (Nginx, PHP, MariaDB, SSL...)</span>
+                    </div>
+                    <div
+                        style="display:flex;align-items:center;gap:0.75rem;background:#0f172a;padding:0.75rem 1rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem">
+                        <span style="color:#64748b">📄</span>
+                        <a href="https://github.com/hugnanastore-eng/vps-manager/blob/main/scripts/vps-admin.sh"
+                            target="_blank" style="color:#38bdf8;text-decoration:none">vps-admin.sh</a>
+                        <span style="color:#64748b;font-size:0.8rem">— Admin panel (11 menus, monitoring, backup)</span>
+                    </div>
+                    <div
+                        style="display:flex;align-items:center;gap:0.75rem;background:#0f172a;padding:0.75rem 1rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem">
+                        <span style="color:#64748b">📁</span>
+                        <a href="https://github.com/hugnanastore-eng/vps-manager/tree/main/scripts/modules"
+                            target="_blank" style="color:#38bdf8;text-decoration:none">modules/</a>
+                        <span style="color:#64748b;font-size:0.8rem">— 9 modules: backup_split, wp_auto_update,
+                            ssh_key_manager, domain_health, wp_staging, analytics...</span>
+                    </div>
+                </div>
+                <p style="color:#64748b;font-size:0.8rem;margin-top:1rem">💡 Tip: Run <code
+                        style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#10b981">curl -sL https://qltro.com/api/vps-download</code>
+                    (without <code
+                        style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#f59e0b">| bash</code>) to
+                    view script content first.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section scroll-reveal" id="faq">
+        <span class="section-label">FAQ</span>
+        <h2>Frequently Asked Questions</h2>
+
+        <div style="max-width:700px">
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">Is the script safe to use?</summary>
+                <p style="color:var(--text-muted);margin-top:1rem">Yes. The entire source code is open, you can inspect
+                    it before running. The script doesn't send data externally, except for Telegram alerts (if you
+                    configure them).</p>
+            </details>
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">Which operating systems are supported?
+                </summary>
+                <p style="color:var(--text-muted);margin-top:1rem">Rocky Linux 8/9 (recommended), AlmaLinux 8/9, Ubuntu
+                    22.04, Ubuntu 24.04. VPS needs at least 2GB RAM and 10GB disk space.</p>
+            </details>
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">How is this different from HocVPS
+                    Script?</summary>
+                <p style="color:var(--text-muted);margin-top:1rem">VPS 1-Touch v2.1 is superior with 9 modules:
+                    per-table DB backup for multi-GB databases, WordPress auto-update with rollback, SSH key manager,
+                    domain health dashboard, staging site, analytics, resource alert Telegram. HocVPS Script doesn't
+                    have these features.</p>
+            </details>
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">Do I need Linux expertise to use it?
+                </summary>
+                <p style="color:var(--text-muted);margin-top:1rem">No deep expertise needed. Just know how to SSH into a
+                    VPS. The admin menu is fully interactive with clear numbered options — just pick a number.</p>
+            </details>
+            <details
+                style="margin-bottom:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+                <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">Can I migrate from HocVPS?</summary>
+                <p style="color:var(--text-muted);margin-top:1rem">Yes. Just backup your data from the old VPS (database
+                    + wp-content), install the script on a new VPS, then import. The script has built-in SQL import in
+                    the Database menu.</p>
+            </details>
+        </div>
+    </section>
+
+    <!-- FAQ Schema JSON-LD -->
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "Is the VPS Admin Script safe to use?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. The entire source code is open, you can inspect it before running. The script doesn't send data externally."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Which operating systems does the script support?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Rocky Linux 8/9, AlmaLinux 8/9, Ubuntu 22.04, Ubuntu 24.04. VPS needs at least 2GB RAM."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "How is this different from HocVPS Script?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "VPS 1-Touch v2.1 is superior with 9 modules: per-table DB backup for multi-GB databases, auto-update WordPress with rollback, SSH key manager, domain health dashboard, staging site, analytics, resource alert Telegram."
+            }
+        }
+    ]
+}
+</script>
+
+    <footer>
+        <p>Made with ❤️ by <a href="https://qltro.com">QLTro.com</a> &mdash; VPS Admin Script v2.1</p>
+        <p style="margin-top:8px">Supports: Rocky Linux, AlmaLinux, Ubuntu &bull; Nginx &bull; PHP 8 &bull; MariaDB
+            &bull;
+            WordPress &bull; WooCommerce</p>
     </footer>
+
+    <script>
+        // Copy command
+        function copyCmd() {
+            const text = document.getElementById('copy-text').textContent;
+            navigator.clipboard.writeText(text);
+            const btn = document.querySelector('.copy-btn');
+            btn.textContent = '✓ Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2000);
+        }
+
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+    </script>
 
 </body>
 
