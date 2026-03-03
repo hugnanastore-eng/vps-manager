@@ -398,11 +398,16 @@ if ($query_string ~ "base64_(en|de)code\(.*\)") { return 403; }
 # Block bad user agents
 if ($http_user_agent ~* "nmap|nikto|wikto|sf|sqlmap|bsqlbf|w3af|acunetix|havij|appscan") { return 403; }
 WAFEOF
-    # Include in nginx.conf if not already
-    if ! grep -q "waf-rules.conf" /etc/nginx/nginx.conf 2>/dev/null; then
-        # Try to include in http block
-        sed -i '/http {/a \    include /etc/nginx/waf-rules.conf;' /etc/nginx/nginx.conf 2>/dev/null || true
-    fi
+    # Include in each server block (set/if directives require server context)
+    # Remove old http-level include if present
+    sed -i '/include.*waf-rules\.conf/d' /etc/nginx/nginx.conf 2>/dev/null || true
+    # Add to each server block in conf.d
+    for conf in /etc/nginx/conf.d/*.conf; do
+        [ -f "$conf" ] || continue
+        if ! grep -q "waf-rules.conf" "$conf" 2>/dev/null; then
+            sed -i '/server_name/a \    include /etc/nginx/waf-rules.conf;' "$conf" 2>/dev/null || true
+        fi
+    done
     nginx -t 2>/dev/null && systemctl reload nginx 2>/dev/null || warn "WAF rules need manual nginx config"
 }
 
