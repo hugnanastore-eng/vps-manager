@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-03-03
+
+### Added — 8 New Modules
+- **Per-table Split Dump** (`backup_split.sh`): Dump từng bảng MySQL riêng biệt, SHA256 checksum, retry 3 lần. Tested: 119 tables, 44MB/583MB, dump 4s, restore 26s.
+- **WordPress Auto-Update** (`wp_auto_update.sh`): Backup → update core/plugins/themes → verify HTTP → auto-rollback nếu lỗi. Telegram notification.
+- **Resource Alert** (`resource_alert.sh`): Giám sát RAM/Disk/CPU/Swap, cảnh báo Telegram, cooldown 30 phút, cron setup 1 click.
+- **Disk Cleanup** (`disk_cleanup.sh`): Dry-run mode, dọn logs/revisions/transients/spam, hiển thị dung lượng thu hồi.
+- **SSH Key Manager** (`ssh_key_manager.sh`): CRUD SSH keys, validate format, chống lockout, sshd_config backup + rollback.
+- **Domain Health Dashboard** (`domain_health.sh`): HTTP status, SSL expiry, TTFB, DB size, disk usage cho tất cả sites.
+- **WordPress Staging** (`wp_staging.sh`): Clone WP → staging.domain.com + .htpasswd protection, xóa staging an toàn.
+- **Simple Analytics** (`simple_analytics.sh`): Parse nginx access logs — top pages, IPs, bandwidth, bots, 404s, status codes.
+
+### Changed
+- Version bumped from 2.0.0 to 2.1.0
+- `do_update()` now downloads all 9 modules (was only multi-ip.sh)
+- `show_banner()` reads version from file instead of hardcoded `$VERSION`
+- `save_component_state()` reads version from file for accuracy
+- `menu_vps_update()` expanded from 5 to 9 items (Disk Cleanup, Resource Check, Domain Health, WP Auto-Update)
+- Admin Menu #4 (Backup) includes Per-table Split Dump
+- Admin Menu #8 (Monitoring) includes Domain Health Dashboard + Simple Analytics
+- Admin Menu #10 (Quick Tools) includes WP Auto-Update, SSH Key Manager, WP Staging
+
+### Fixed
+- `vps-update update` displayed wrong version after update (stale `$VERSION` variable)
+- `do_update()` banner now shows correct remote version + module count
+- `save_component_state()` wrote stale version to `components.json`
+
+### Security
+- SSH key injection prevention: blocks `;&|$\`` characters
+- sshd_config validation (`sshd -t`) before restart, auto-restore on failure
+- Staging site deletion validated with `^staging\.[a-zA-Z0-9._-]+$` regex
+- Database name sanitization with `^[a-zA-Z0-9_]+$` regex
+
 ## [2.0.0] - 2026-03-03
 
 ### Added
