@@ -4,7 +4,7 @@
 #  Usage: vps-admin (or just type 'vps-admin' anywhere)
 # ================================================================
 set -uo pipefail
-readonly VER="2.5.0"
+readonly VER="2.5.1"
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 export LC_ALL=C
 
