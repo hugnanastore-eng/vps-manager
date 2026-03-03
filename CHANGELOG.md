@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-03-03
+
+### Added — Internationalization (i18n)
+- **7 Language Files** (`lang/en.sh`, `vi.sh`, `zh.sh`, `ja.sh`, `fr.sh`, `es.sh`, `pt.sh`): ~200 translated strings per language
+- **`load_lang()` Function**: Auto-detects language from config → system locale → defaults to English
+- **`change_language()` Menu**: Option 8 in System Settings — switch language and save to config
+- **7 Landing Pages**: Full documentation in EN, VI, ZH, FR, JA, ES, PT with feature details
+- **Hreflang SEO Tags**: All landing pages interlinked for Google multi-language indexing
+- **Language Bar**: 7-language selector on all documentation pages
+
+### Changed
+- Version bumped from 2.1.0 to 2.5.0
+- Main menu and System Settings now use `$MSG_*` variables from lang files
+- `install.sh` now downloads and deploys 7 language files alongside modules
+- Removed `<link rel="canonical">` tags — replaced with `hreflang` for separate language indexing
+
 ## [2.1.0] - 2026-03-03
 
 ### Added — 8 New Modules
