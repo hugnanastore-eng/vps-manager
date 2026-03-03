@@ -140,7 +140,7 @@ check_component() {
             [ -f /usr/local/bin/backup_full.sh ] || crontab -l 2>/dev/null | grep -q backup
             ;;
         telegram-bot)
-            [ -f "$CONFIG_DIR/telegram.conf" ] || grep -q "TELEGRAM_TOKEN" "$CONFIG_FILE" 2>/dev/null
+            [ -f "$CONFIG_DIR/telegram.conf" ] || grep -q "TELEGRAM_TOKEN" "$CONFIG_FILE" 2>/dev/null || grep -q "TG_TOKEN" "$CONFIG_FILE" 2>/dev/null || [ -f /usr/local/bin/tg_alert.sh ]
             ;;
         monitoring)
             [ -f /usr/local/bin/site_monitor.sh ] || crontab -l 2>/dev/null | grep -q monitor

@@ -940,6 +940,16 @@ menu_quick_tools() {
     header
     echo -e "${WHITE}${BOLD}  ⚡ QUICK TOOLS${NC}"
     echo -e "${GREEN}  ─────────────────────────────────${NC}"
+
+    # Show Telegram status
+    local _tg_status="${RED}✗ Not configured${NC}"
+    if [ -n "$TG_TOKEN" ] && [ -n "$TG_CHAT" ]; then
+        _tg_status="${GREEN}✓ Active${NC}"
+    fi
+    echo -e "  📟 Telegram: ${_tg_status}"
+    echo ""
+
+    echo -e "  ${YELLOW}13.${NC} 📟 Telegram Bot Config"
     echo -e "  ${CYAN}1.${NC} 🛡️  Malware Scanner (quét WP)"
     echo -e "  ${CYAN}2.${NC} 🔥 Firewall Hardening"
     echo -e "  ${CYAN}3.${NC} 📦 Interactive Backup Restore"
@@ -957,6 +967,7 @@ menu_quick_tools() {
     read -p "  Select: " QT_CHOICE
 
     case $QT_CHOICE in
+        13) configure_telegram ;; 
         1) vps-update malware-scan; pause ;;
         2) vps-update firewall; pause ;;
         3) interactive_restore ;;
@@ -970,6 +981,81 @@ menu_quick_tools() {
         11) if type menu_ssh_keys &>/dev/null; then menu_ssh_keys; else echo -e "${RED}  Module not loaded. Run: vps-update update${NC}"; sleep 2; fi ;;
         12) if type menu_wp_staging &>/dev/null; then menu_wp_staging; else echo -e "${RED}  Module not loaded. Run: vps-update update${NC}"; sleep 2; fi ;;
     esac
+}
+
+configure_telegram() {
+    echo ""
+    echo -e "${WHITE}${BOLD}  📟 TELEGRAM BOT CONFIG${NC}"
+    echo -e "${GREEN}  ─────────────────────────────────${NC}"
+
+    # Show current status
+    if [ -n "$TG_TOKEN" ] && [ -n "$TG_CHAT" ]; then
+        echo -e "  Status: ${GREEN}✓ Configured${NC}"
+        echo -e "  Token:  ${CYAN}${TG_TOKEN:0:10}...${NC}"
+        echo -e "  Chat:   ${CYAN}$TG_CHAT${NC}"
+        echo ""
+        echo -e "  ${CYAN}1.${NC} Update token & chat ID"
+        echo -e "  ${CYAN}2.${NC} Send test message"
+        echo -e "  ${CYAN}3.${NC} Remove config"
+        echo -e "  ${RED}0.${NC} Back"
+        echo ""
+        read -p "  Select: " _tg_action
+        case "$_tg_action" in
+            1) _tg_setup ;;
+            2) _tg_test ;;
+            3) sed -i '/^TG_TOKEN=/d;/^TG_CHAT=/d' /root/.vps-config/setup.conf
+               unset TG_TOKEN TG_CHAT
+               echo -e "  ${GREEN}✓ Telegram config removed${NC}"; pause ;;
+        esac
+    else
+        echo -e "  Status: ${RED}✗ Not configured${NC}"
+        echo ""
+        echo "  To get a Telegram Bot Token:"
+        echo "    1. Open Telegram > search @BotFather"
+        echo "    2. Send /newbot and follow instructions"
+        echo "    3. Copy the token"
+        echo ""
+        echo "  To get your Chat ID:"
+        echo "    1. Search @userinfobot on Telegram"
+        echo "    2. Send /start — it will reply with your ID"
+        echo ""
+        _tg_setup
+    fi
+}
+
+_tg_setup() {
+    read -p "  Telegram Bot Token: " _new_token
+    read -p "  Chat ID: " _new_chat
+    [ -z "$_new_token" ] || [ -z "$_new_chat" ] && { echo -e "  ${RED}Both fields required${NC}"; pause; return; }
+
+    # Save to config
+    sed -i '/^TG_TOKEN=/d;/^TG_CHAT=/d' /root/.vps-config/setup.conf 2>/dev/null
+    echo "TG_TOKEN=\"$_new_token\"" >> /root/.vps-config/setup.conf
+    echo "TG_CHAT=\"$_new_chat\"" >> /root/.vps-config/setup.conf
+    export TG_TOKEN="$_new_token"
+    export TG_CHAT="$_new_chat"
+
+    # Update tg_alert.sh if exists
+    if [ -f /usr/local/bin/tg_alert.sh ]; then
+        sed -i "s|TOKEN=.*|TOKEN=\"$_new_token\"|" /usr/local/bin/tg_alert.sh
+        sed -i "s|CHAT=.*|CHAT=\"$_new_chat\"|" /usr/local/bin/tg_alert.sh
+    fi
+
+    echo -e "  ${GREEN}✓ Telegram configured!${NC}"
+    _tg_test
+}
+
+_tg_test() {
+    echo -e "  Sending test message..."
+    local _result=$(curl -s "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+        -d "chat_id=${TG_CHAT}" -d "text=🟢 VPS Admin ($VPS_NAME) - Test OK! $(date '+%H:%M %d/%m/%Y')" 2>&1)
+    if echo "$_result" | grep -q '"ok":true'; then
+        echo -e "  ${GREEN}✓ Test message sent! Check your Telegram.${NC}"
+    else
+        echo -e "  ${RED}✗ Failed! Check token & chat ID.${NC}"
+        echo -e "  ${YELLOW}Response: $(echo $_result | head -c 200)${NC}"
+    fi
+    pause
 }
 
 # ---- 12. VPS UPDATE & TOOLS ----
