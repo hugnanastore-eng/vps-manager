@@ -1202,10 +1202,14 @@ do_update() {
         log "⚠ Could not fetch remote version, using local: $remote_ver"
     fi
 
-    # Backup current scripts
-    mkdir -p /root/.vps-config/backup
-    cp /usr/local/bin/vps-admin.sh /root/.vps-config/backup/vps-admin.sh.bak 2>/dev/null
-    cp /usr/local/bin/backup_full.sh /root/.vps-config/backup/backup_full.sh.bak 2>/dev/null
+    # Backup current scripts (full backup for rollback)
+    local _bak_dir="/root/.vps-config/backup/$(date +%Y%m%d_%H%M%S)"
+    mkdir -p "$_bak_dir"
+    cp /usr/local/bin/vps-admin.sh "$_bak_dir/" 2>/dev/null
+    cp /usr/local/bin/backup_full.sh "$_bak_dir/" 2>/dev/null
+    cp /usr/local/bin/vps-update.sh "$_bak_dir/" 2>/dev/null
+    cp -r /usr/local/bin/vps-modules "$_bak_dir/vps-modules" 2>/dev/null
+    log "✓ Backed up to $_bak_dir"
 
     # Download latest scripts
     log "Downloading latest scripts..."
@@ -1246,6 +1250,26 @@ do_update() {
         fi
     done
     [ $_mod_updated -gt 0 ] && log "✓ ${_mod_updated} modules updated"
+
+    # Setup nginx log rotation (if not already configured)
+    if [ ! -f /etc/logrotate.d/nginx-vps ]; then
+        cat > /etc/logrotate.d/nginx-vps << 'LOGROTATE'
+/var/log/nginx/*.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0640 www-data adm
+    sharedscripts
+    postrotate
+        [ -f /var/run/nginx.pid ] && kill -USR1 $(cat /var/run/nginx.pid) 2>/dev/null || true
+    endscript
+}
+LOGROTATE
+        log "✓ Nginx log rotation configured (14 days, compressed)"
+    fi
 
     # Download and install language files
     log "Updating language files..."

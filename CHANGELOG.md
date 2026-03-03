@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] - 2026-03-03
+
+### Added
+- **Inline Help System**: Type `?` in any menu for full descriptions, `N?` for specific option details
+- **i18n Help Text**: 49 translated help strings across all 7 languages with safety indicators (✅/⚠)
+- **SSL Expiry Alerts**: Telegram notification 7 days before certificate expiration
+- **DB Size Alerts**: Telegram warning when any database exceeds threshold (default 1GB)
+- **GitHub Actions CI**: ShellCheck lint on every push to `scripts/` directory
+- **Nginx Log Rotation**: Automatic logrotate config for access/error logs
+
+### Changed
+- **OPcache status**: Formatted display with memory, hit rate, cached files (was raw `var_dump`)
+- **Security hardening**: `set -o pipefail`, `readonly VER`, restricted `PATH`, `export LC_ALL=C`
+- **Enhanced header**: Shows OS name, CPU cores, load average, PHP/Nginx versions
+- **Website listing**: Main menu shows active WordPress sites with SSL status, DB, disk usage
+- **Pre-update backup**: Now backs up all scripts + modules/ to timestamped directory
+- **README**: Complete rewrite in English with all 13 menus and 9 modules documented
+
+### Fixed
+- `set -u` removed — caused `unbound variable` crash on config-loaded variables
+- Pre-initialized config vars before sourcing `setup.conf`
+
 ## [2.5.0] - 2026-03-03
 
 ### Added — Internationalization (i18n)
@@ -24,13 +46,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.1.0] - 2026-03-03
 
 ### Added — 8 New Modules
-- **Per-table Split Dump** (`backup_split.sh`): Dump từng bảng MySQL riêng biệt, SHA256 checksum, retry 3 lần. Tested: 119 tables, 44MB/583MB, dump 4s, restore 26s.
-- **WordPress Auto-Update** (`wp_auto_update.sh`): Backup → update core/plugins/themes → verify HTTP → auto-rollback nếu lỗi. Telegram notification.
-- **Resource Alert** (`resource_alert.sh`): Giám sát RAM/Disk/CPU/Swap, cảnh báo Telegram, cooldown 30 phút, cron setup 1 click.
-- **Disk Cleanup** (`disk_cleanup.sh`): Dry-run mode, dọn logs/revisions/transients/spam, hiển thị dung lượng thu hồi.
-- **SSH Key Manager** (`ssh_key_manager.sh`): CRUD SSH keys, validate format, chống lockout, sshd_config backup + rollback.
-- **Domain Health Dashboard** (`domain_health.sh`): HTTP status, SSL expiry, TTFB, DB size, disk usage cho tất cả sites.
-- **WordPress Staging** (`wp_staging.sh`): Clone WP → staging.domain.com + .htpasswd protection, xóa staging an toàn.
+- **Per-table Split Dump** (`backup_split.sh`): Dumps each MySQL table individually with SHA256 checksum and 3 retries. Tested: 119/119 tables, 44MB/583MB, dump 4s, restore 26s.
+- **WordPress Auto-Update** (`wp_auto_update.sh`): Backup → update core/plugins/themes → verify HTTP → auto-rollback on failure. Telegram notification.
+- **Resource Alert** (`resource_alert.sh`): RAM/Disk/CPU/Swap monitoring, Telegram alerts, 30-min cooldown, 1-click cron setup.
+- **Disk Cleanup** (`disk_cleanup.sh`): Dry-run mode, cleans logs/revisions/transients/spam, shows recovered space.
+- **SSH Key Manager** (`ssh_key_manager.sh`): CRUD SSH keys, format validation, lockout prevention, sshd_config backup + rollback.
+- **Domain Health Dashboard** (`domain_health.sh`): HTTP status, SSL expiry, TTFB, DB size, disk usage for all sites.
+- **WordPress Staging** (`wp_staging.sh`): Clone WP → staging.domain.com + .htpasswd protection, safe staging removal.
 - **Simple Analytics** (`simple_analytics.sh`): Parse nginx access logs — top pages, IPs, bandwidth, bots, 404s, status codes.
 
 ### Changed

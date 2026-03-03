@@ -833,7 +833,26 @@ menu_performance() {
                echo -e "  $d: ${C}${TTFB}s${NC}"
            done; pause ;;
         2) systemctl status php-fpm 2>/dev/null || systemctl status php8.1-fpm 2>/dev/null; pause ;;
-        3) php -r "var_dump(opcache_get_status());" 2>/dev/null | head -30; pause ;;
+        3)
+            echo ""
+            echo -e "  ${WHITE}${BOLD}📊 OPcache Status${NC}"
+            echo -e "  ${GREEN}─────────────────────────────────${NC}"
+            php -r '
+                $s = opcache_get_status(false);
+                if (!$s) { echo "  OPcache is disabled\n"; exit; }
+                $m = $s["memory_usage"];
+                $st = $s["opcache_statistics"];
+                $total = $m["used_memory"] + $m["free_memory"];
+                $pct = round($m["used_memory"] / $total * 100, 1);
+                echo "  ✅ Enabled: " . ($s["opcache_enabled"] ? "Yes" : "No") . "\n";
+                echo "  💾 Memory: " . round($m["used_memory"]/1048576,1) . "M / " . round($total/1048576,1) . "M (" . $pct . "% used)\n";
+                echo "  📁 Cached files: " . $st["num_cached_scripts"] . "\n";
+                echo "  🎯 Hit rate: " . round($st["opcache_hit_rate"],1) . "%\n";
+                echo "  ✅ Hits: " . number_format($st["hits"]) . "  |  ❌ Misses: " . number_format($st["misses"]) . "\n";
+                echo "  🔄 Restarts: " . $st["oom_restarts"] . " (OOM) / " . $st["manual_restarts"] . " (manual)\n";
+                if ($s["cache_full"]) echo "  ⚠️  Cache is FULL!\n";
+            ' 2>/dev/null || echo -e "  ${RED}OPcache not available${NC}"
+            pause ;;
         4) systemctl restart php-fpm 2>/dev/null || systemctl restart php8.1-fpm; echo -e "${GREEN}  ✓ PHP-FPM restarted${NC}"; pause ;;
         5) nginx -t && nginx -s reload; echo -e "${GREEN}  ✓ Nginx reloaded${NC}"; pause ;;
         6) php -r "opcache_reset();" 2>/dev/null; echo -e "${GREEN}  ✓ OPcache cleared${NC}"; pause ;;

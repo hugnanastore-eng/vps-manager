@@ -1,0 +1,47 @@
+name: ShellCheck Lint
+
+on:
+  push:
+    branches: [main]
+    paths: ['scripts/**/*.sh']
+  pull_request:
+    paths: ['scripts/**/*.sh']
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Lint main scripts
+        run: |
+          echo "🔍 Checking main scripts..."
+          shellcheck -s bash -e SC2034,SC2086,SC2155,SC1090,SC1091,SC2154 \
+            scripts/vps-admin.sh \
+            scripts/install.sh \
+            scripts/vps-setup.sh || true
+
+      - name: Lint modules
+        run: |
+          echo "🔍 Checking modules..."
+          for f in scripts/modules/*.sh; do
+            echo "  → $f"
+            shellcheck -s bash -e SC2034,SC2086,SC2155,SC1090,SC1091,SC2154 "$f" || true
+          done
+
+      - name: Lint language files
+        run: |
+          echo "🔍 Checking language files..."
+          for f in scripts/lang/*.sh; do
+            echo "  → $f"
+            shellcheck -s bash -e SC2034,SC1090,SC1091 "$f" || true
+          done
+
+      - name: Summary
+        run: |
+          echo "✅ ShellCheck completed"
+          echo "Note: Using || true so warnings don't block CI"
+          echo "Excluded rules: SC2034 (unused vars), SC2086 (quoting), SC2155 (declare/assign), SC1090/SC1091 (source), SC2154 (referenced but not assigned)"

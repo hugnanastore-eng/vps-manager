@@ -92,6 +92,43 @@ resource_check() {
         fi
     fi
 
+    # SSL certificate expiry check (warn 7 days before)
+    for cert_dir in /etc/letsencrypt/live/*/; do
+        [ -d "$cert_dir" ] || continue
+        local _domain=$(basename "$cert_dir")
+        [ "$_domain" = "README" ] && continue
+        local _cert="$cert_dir/fullchain.pem"
+        [ -f "$_cert" ] || continue
+        local _expiry=$(openssl x509 -noout -enddate -in "$_cert" 2>/dev/null | cut -d= -f2)
+        [ -z "$_expiry" ] && continue
+        local _exp_epoch=$(date -d "$_expiry" +%s 2>/dev/null)
+        local _now_epoch=$(date +%s)
+        local _days_left=$(( (_exp_epoch - _now_epoch) / 86400 ))
+        if [ "$_days_left" -le 7 ] 2>/dev/null; then
+            if _alert_check_cooldown "ssl_$_domain"; then
+                if [ "$_days_left" -le 0 ]; then
+                    alerts="${alerts}🔴 SSL EXPIRED: ${_domain}\n"
+                else
+                    alerts="${alerts}🟡 SSL expiring: ${_domain} (${_days_left} days left)\n"
+                fi
+            fi
+        fi
+    done
+
+    # Database size alert (warn when any DB > 1GB)
+    local ALERT_DB_SIZE_MB=${ALERT_DB_SIZE_MB:-1024}
+    if command -v mysql &>/dev/null; then
+        local _db_sizes=$(_mysql -N -e "SELECT table_schema, ROUND(SUM(data_length+index_length)/1048576) AS size_mb FROM information_schema.tables GROUP BY table_schema HAVING size_mb > $ALERT_DB_SIZE_MB ORDER BY size_mb DESC;" 2>/dev/null)
+        if [ -n "$_db_sizes" ]; then
+            while read -r _dbname _dbsize; do
+                [ -z "$_dbname" ] && continue
+                if _alert_check_cooldown "db_$_dbname"; then
+                    alerts="${alerts}🟡 DB large: ${_dbname} (${_dbsize}MB > ${ALERT_DB_SIZE_MB}MB)\n"
+                fi
+            done <<< "$_db_sizes"
+        fi
+    fi
+
     # Send alert if any
     if [ -n "$alerts" ]; then
         local msg="⚠️ <b>[$hostname] Resource Alert</b>\n\n${alerts}\nTime: $(date '+%H:%M %d/%m/%Y')"
