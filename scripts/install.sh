@@ -441,7 +441,20 @@ install_admin_panel() {
             log "  ✓ Module: $mod" || \
             warn "  ✗ Failed: $mod"
     done
-    log "Admin panel + ${#modules[@]} modules installed. Run: vps-admin"
+
+    # Install language files (i18n)
+    log "Installing language files..."
+    mkdir -p /usr/local/bin/vps-modules/lang
+    local LANG_URL="$SCRIPT_URL/lang"
+    local langs=("en" "vi" "zh" "ja" "fr" "es" "pt")
+    for lang in "${langs[@]}"; do
+        curl -fsSL --retry 3 "$LANG_URL/${lang}.sh" -o "/usr/local/bin/vps-modules/lang/${lang}.sh" 2>/dev/null && \
+            chmod +x "/usr/local/bin/vps-modules/lang/${lang}.sh" && \
+            log "  ✓ Lang: ${lang}.sh" || \
+            warn "  ✗ Failed: ${lang}.sh"
+    done
+
+    log "Admin panel + ${#modules[@]} modules + ${#langs[@]} languages installed. Run: vps-admin"
 }
 
 install_backup_system() {

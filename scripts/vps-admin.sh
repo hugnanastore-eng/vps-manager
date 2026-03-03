@@ -6,6 +6,53 @@
 
 source /root/.vps-config/setup.conf 2>/dev/null
 
+# ── Language Loader (i18n) ──
+load_lang() {
+    local lang_dir="/usr/local/bin/vps-modules/lang"
+    local lang="${VPS_LANG:-}"
+    # Fallback chain: config → system locale → English
+    if [ -z "$lang" ]; then
+        lang=$(echo "${LANG:-en}" | cut -d_ -f1 | cut -d. -f1)
+    fi
+    [ -f "$lang_dir/${lang}.sh" ] || lang="en"
+    source "$lang_dir/${lang}.sh" 2>/dev/null || {
+        # Inline English fallback for critical strings
+        MSG_MAIN_MENU="MAIN MENU"
+        MSG_MENU_EXIT="Exit"
+        MSG_SELECT="Select"
+        MSG_PRESS_ENTER="Press Enter to continue..."
+        MSG_INVALID="Invalid choice"
+    }
+}
+
+change_language() {
+    echo -e "\n${WHITE}${BOLD}  ${MSG_SYS_LANG:-Change Language}${NC}"
+    echo -e "${GREEN}  ─────────────────────────────────${NC}"
+    echo -e "  ${CYAN}1.${NC} 🇬🇧 English"
+    echo -e "  ${CYAN}2.${NC} 🇻🇳 Tiếng Việt"
+    echo -e "  ${CYAN}3.${NC} 🇨🇳 中文"
+    echo -e "  ${CYAN}4.${NC} 🇯🇵 日本語"
+    echo -e "  ${CYAN}5.${NC} 🇫🇷 Français"
+    echo -e "  ${CYAN}6.${NC} 🇪🇸 Español"
+    echo -e "  ${CYAN}7.${NC} 🇧🇷 Português"
+    echo ""
+    read -p "  ${MSG_SELECT:-Select} [1-7]: " _lang_pick
+    case "$_lang_pick" in
+        1) VPS_LANG="en" ;; 2) VPS_LANG="vi" ;; 3) VPS_LANG="zh" ;;
+        4) VPS_LANG="ja" ;; 5) VPS_LANG="fr" ;; 6) VPS_LANG="es" ;;
+        7) VPS_LANG="pt" ;; *) return ;;
+    esac
+    # Save to config
+    if [ -f /root/.vps-config/setup.conf ]; then
+        sed -i '/^VPS_LANG=/d' /root/.vps-config/setup.conf
+        echo "VPS_LANG=$VPS_LANG" >> /root/.vps-config/setup.conf
+    fi
+    load_lang
+    echo -e "  ${GREEN}✓ ${MSG_SYS_LANG_CHANGED:-Language changed to} ${VPS_LANG}${NC}"
+}
+
+load_lang
+
 # ── MySQL Auth Helper ──
 # Uses DB_ROOT_PASS from config; falls back to unix socket auth (no password)
 _mysql_auth=""
@@ -188,7 +235,7 @@ header() {
 
 pause() {
     echo ""
-    read -p "$(echo -e ${YELLOW}Press Enter to continue...${NC})" dummy
+    read -p "$(echo -e ${YELLOW}${MSG_PRESS_ENTER}${NC})" dummy
 }
 
 # ========================
@@ -197,23 +244,23 @@ pause() {
 
 show_main_menu() {
     header
-    echo -e "${WHITE}${BOLD}  MAIN MENU${NC}"
+    echo -e "${WHITE}${BOLD}  $MSG_MAIN_MENU${NC}"
     echo -e "${GREEN}  ─────────────────────────────────${NC}"
-    echo -e "  ${CYAN}1.${NC} Website Management"
-    echo -e "  ${CYAN}2.${NC} Database Management"
-    echo -e "  ${CYAN}3.${NC} SSL Certificate"
-    echo -e "  ${CYAN}4.${NC} Backup & Restore"
-    echo -e "  ${CYAN}5.${NC} Security & WAF"
-    echo -e "  ${CYAN}6.${NC} Performance & Speed"
-    echo -e "  ${CYAN}7.${NC} VPS Cluster Sync"
-    echo -e "  ${CYAN}8.${NC} Monitoring & Logs"
-    echo -e "  ${CYAN}9.${NC} System Settings"
-    echo -e "  ${MAGENTA}10.${NC} Quick Tools"
-    echo -e "  ${MAGENTA}11.${NC} Multi-IP Management"
-    echo -e "  ${YELLOW}12.${NC} VPS Update & Tools"
-    echo -e "  ${RED}0.${NC} Exit"
+    echo -e "  ${CYAN}1.${NC} $MSG_MENU_WEBSITE"
+    echo -e "  ${CYAN}2.${NC} $MSG_MENU_DATABASE"
+    echo -e "  ${CYAN}3.${NC} $MSG_MENU_SSL"
+    echo -e "  ${CYAN}4.${NC} $MSG_MENU_BACKUP"
+    echo -e "  ${CYAN}5.${NC} $MSG_MENU_SECURITY"
+    echo -e "  ${CYAN}6.${NC} $MSG_MENU_PERFORMANCE"
+    echo -e "  ${CYAN}7.${NC} $MSG_MENU_CLUSTER"
+    echo -e "  ${CYAN}8.${NC} $MSG_MENU_MONITORING"
+    echo -e "  ${CYAN}9.${NC} $MSG_MENU_SYSTEM"
+    echo -e "  ${MAGENTA}10.${NC} $MSG_MENU_QUICK"
+    echo -e "  ${MAGENTA}11.${NC} $MSG_MENU_MULTIIP"
+    echo -e "  ${YELLOW}12.${NC} $MSG_MENU_UPDATE"
+    echo -e "  ${RED}0.${NC} $MSG_MENU_EXIT"
     echo ""
-    read -p "  Select [0-12]: " CHOICE
+    read -p "  $MSG_SELECT [0-12]: " CHOICE
 }
 
 # ---- 1. WEBSITE MANAGEMENT ----
@@ -855,34 +902,36 @@ menu_monitoring() {
 # ---- 9. SYSTEM ----
 menu_system() {
     header
-    echo -e "${WHITE}${BOLD}  SYSTEM SETTINGS${NC}"
+    echo -e "${WHITE}${BOLD}  $MSG_SYS_TITLE${NC}"
     echo -e "${GREEN}  ─────────────────────────────────${NC}"
-    echo -e "  ${CYAN}1.${NC} System info"
-    echo -e "  ${CYAN}2.${NC} Update system packages"
-    echo -e "  ${CYAN}3.${NC} Restart all services"
-    echo -e "  ${CYAN}4.${NC} Edit Telegram config"
-    echo -e "  ${CYAN}5.${NC} View crontab"
-    echo -e "  ${CYAN}6.${NC} Edit crontab"
-    echo -e "  ${CYAN}7.${NC} Show VPS config"
-    echo -e "  ${RED}0.${NC} Back"
+    echo -e "  ${CYAN}1.${NC} $MSG_SYS_INFO"
+    echo -e "  ${CYAN}2.${NC} $MSG_SYS_UPDATE"
+    echo -e "  ${CYAN}3.${NC} $MSG_SYS_RESTART"
+    echo -e "  ${CYAN}4.${NC} $MSG_SYS_TG_CONFIG"
+    echo -e "  ${CYAN}5.${NC} $MSG_SYS_CRON_VIEW"
+    echo -e "  ${CYAN}6.${NC} $MSG_SYS_CRON_EDIT"
+    echo -e "  ${CYAN}7.${NC} $MSG_SYS_CONFIG"
+    echo -e "  ${YELLOW}8.${NC} 🌍 $MSG_SYS_LANG"
+    echo -e "  ${RED}0.${NC} $MSG_BACK"
     echo ""
-    read -p "  Select: " SYS_CHOICE
+    read -p "  $MSG_SELECT: " SYS_CHOICE
 
     case $SYS_CHOICE in
         1) echo ""; uname -a; echo ""; free -h; echo ""; df -h; echo ""; uptime; pause ;;
         2) if [ "$OS" = "rocky" ]; then dnf update -y; else apt-get update && apt-get upgrade -y; fi; pause ;;
         3) systemctl restart nginx; systemctl restart php-fpm 2>/dev/null || systemctl restart php8.1-fpm; systemctl restart mariadb
-           echo -e "${GREEN}  ✓ All services restarted${NC}"; pause ;;
-        4) read -p "  Telegram Bot Token: " NT; read -p "  Chat ID: " NCHAT
+           echo -e "${GREEN}  ✓ $MSG_SYS_RESTARTED${NC}"; pause ;;
+        4) read -p "  $MSG_SYS_TG_TOKEN: " NT; read -p "  $MSG_SYS_TG_CHAT: " NCHAT
            sed -i "s|TG_TOKEN=.*|TG_TOKEN=\"$NT\"|" /root/.vps-config/setup.conf
            sed -i "s|TG_CHAT=.*|TG_CHAT=\"$NCHAT\"|" /root/.vps-config/setup.conf
            # Update tg_alert.sh
            sed -i "s|TOKEN=.*|TOKEN=\"$NT\"|" /usr/local/bin/tg_alert.sh
            sed -i "s|CHAT=.*|CHAT=\"$NCHAT\"|" /usr/local/bin/tg_alert.sh
-           echo -e "${GREEN}  ✓ Telegram config updated${NC}"; pause ;;
+           echo -e "${GREEN}  ✓ $MSG_SYS_TG_UPDATED${NC}"; pause ;;
         5) crontab -l; pause ;;
         6) crontab -e ;;
         7) cat /root/.vps-config/setup.conf 2>/dev/null; pause ;;
+        8) change_language; pause ;;
     esac
 }
 
